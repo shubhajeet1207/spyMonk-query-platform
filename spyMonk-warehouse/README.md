@@ -105,6 +105,13 @@ docker compose up --build          # uses docker-compose.yml at the repo root
 - Requests are logged as structured JSON (with request IDs and durations) to stdout and `backend/logs/app.log`.
 - The repo-root monitoring stack (`docker compose -f ../docker-compose.monitoring.yml up -d`) ships that log file to Loki via Promtail and provisions Grafana at http://localhost:3000 (admin/admin).
 
+### Production (deployed instance)
+
+The Render deployment ships logs and metrics to Grafana Cloud (see `entrypoint.sh`, `loki_handler.py`, and `alloy-config.alloy.template` at the repo root):
+
+- **Dashboard**: https://spymonk.grafana.net/d/spymonk-production/spymonk-warehouse-production
+- **Logs (Explore)**: https://spymonk.grafana.net/explore?schemaVersion=1&panes=%7B%22cxh%22:%7B%22datasource%22:%22grafanacloud-logs%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22%7Bapp%3D%5C%22spymonk-warehouse%5C%22%7D%20%7C%3D%20%60%60%22,%22queryType%22:%22range%22,%22datasource%22:%7B%22type%22:%22loki%22,%22uid%22:%22grafanacloud-logs%22%7D,%22editorMode%22:%22builder%22,%22direction%22:%22backward%22%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D,%22panelsState%22:%7B%22logs%22:%7B%22sortOrder%22:%22Descending%22%7D%7D,%22compact%22:false%7D%7D
+
 ## Project layout
 
 ```
