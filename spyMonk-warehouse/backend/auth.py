@@ -1,24 +1,51 @@
 """
 Authentication and authorization middleware
 """
-from fastapi import HTTPException, Security, status
+from fastapi import HTTPException, Request, Security, status
 from fastapi.security import APIKeyHeader
 from typing import Optional
+from urllib.parse import urlparse
 from config import settings
 
 # API Key authentication
 api_key_header = APIKeyHeader(name=settings.API_KEY_HEADER, auto_error=False)
 
 
-async def verify_api_key(api_key: Optional[str] = Security(api_key_header)) -> str:
+def _is_same_origin_request(request: Request) -> bool:
     """
-    Verify API key from request header
+    True when the request's Origin header matches the host it was sent to —
+    i.e. this app's own served frontend calling its own API, not a different
+    site or a direct/external caller (curl, scripts). A public static JS
+    bundle can't safely hold a real secret, so same-origin calls are trusted
+    instead; works for any deployed domain without hardcoding one.
+    """
+    origin = request.headers.get("origin")
+    if not origin:
+        return False
+    try:
+        origin_host = urlparse(origin).hostname
+    except ValueError:
+        return False
+    return origin_host is not None and origin_host == request.url.hostname
+
+
+async def verify_api_key(
+    request: Request,
+    api_key: Optional[str] = Security(api_key_header),
+) -> str:
+    """
+    Verify API key from request header.
+
+    Same-origin requests (the app's own served frontend) are allowed without
+    a key. Direct/external callers (curl, scripts, a different site) must
+    still supply a valid X-API-Key.
 
     Args:
+        request: The incoming request, used for the same-origin check
         api_key: API key from request header
 
     Returns:
-        The verified API key
+        The verified API key (or a placeholder for dev-mode/same-origin)
 
     Raises:
         HTTPException: If API key is missing or invalid
@@ -28,6 +55,8 @@ async def verify_api_key(api_key: Optional[str] = Security(api_key_header)) -> s
         return "dev-mode"
 
     if not api_key:
+        if _is_same_origin_request(request):
+            return "same-origin"
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing API key",
