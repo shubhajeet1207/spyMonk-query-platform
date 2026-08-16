@@ -42,13 +42,15 @@ _log_handlers = [logging.StreamHandler(), logging.FileHandler(LOG_FILE_PATH)]
 
 # Optional: ship logs straight to a hosted Loki (e.g. Grafana Cloud) for
 # deployments where no local Promtail can reach the container's filesystem.
-LOKI_URL = os.getenv("LOKI_URL", "")
+LOKI_URL = os.getenv("LOKI_URL", "").strip()
 if LOKI_URL:
     from loki_handler import LokiHandler
     _log_handlers.append(LokiHandler(
         url=LOKI_URL,
-        username=os.getenv("LOKI_USERNAME", ""),
-        password=os.getenv("LOKI_API_KEY", ""),
+        # .strip(): a trailing newline/space from copy-pasting into a host's
+        # env var UI silently corrupts Basic Auth and looks like a 401.
+        username=os.getenv("LOKI_USERNAME", "").strip(),
+        password=os.getenv("LOKI_API_KEY", "").strip(),
         labels={
             "job": "spymonk-warehouse-backend",
             "app": "spymonk-warehouse",
