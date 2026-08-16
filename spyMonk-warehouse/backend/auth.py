@@ -13,12 +13,22 @@ api_key_header = APIKeyHeader(name=settings.API_KEY_HEADER, auto_error=False)
 
 def _is_same_origin_request(request: Request) -> bool:
     """
-    True when the request's Origin header matches the host it was sent to —
-    i.e. this app's own served frontend calling its own API, not a different
-    site or a direct/external caller (curl, scripts). A public static JS
-    bundle can't safely hold a real secret, so same-origin calls are trusted
-    instead; works for any deployed domain without hardcoding one.
+    True when this request is coming from the app's own served frontend on
+    the same origin, not a different site or a direct/external caller (curl,
+    scripts). A public static JS bundle can't safely hold a real secret, so
+    same-origin calls are trusted instead of requiring one.
+
+    Prefers Sec-Fetch-Site: modern browsers send it on every request they
+    initiate, including plain GETs, specifically so servers can make this
+    kind of decision. Origin is NOT a reliable signal here on its own — it's
+    mainly sent for cross-origin/CORS calls and state-changing methods, not
+    plain same-origin GETs — so it's kept only as a fallback for older
+    browsers that predate Sec-Fetch-Site support.
     """
+    sec_fetch_site = request.headers.get("sec-fetch-site")
+    if sec_fetch_site is not None:
+        return sec_fetch_site == "same-origin"
+
     origin = request.headers.get("origin")
     if not origin:
         return False
