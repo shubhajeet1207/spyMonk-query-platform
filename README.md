@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="banner.svg" alt="spyMonk — distributed SQL engine and analytical warehouse" width="100%" />
+</p>
+
 # spyMonk
 
 A two-part data platform, built from first principles:
