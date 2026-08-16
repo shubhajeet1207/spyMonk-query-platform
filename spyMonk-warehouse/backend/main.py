@@ -38,13 +38,30 @@ LOG_FILE_PATH = os.getenv("LOG_FILE_PATH", "logs/app.log")
 os.makedirs(os.path.dirname(LOG_FILE_PATH) or ".", exist_ok=True)
 
 # Configure logging to stdout and a local file that Promtail can scrape.
+_log_handlers = [logging.StreamHandler(), logging.FileHandler(LOG_FILE_PATH)]
+
+# Optional: ship logs straight to a hosted Loki (e.g. Grafana Cloud) for
+# deployments where no local Promtail can reach the container's filesystem.
+LOKI_URL = os.getenv("LOKI_URL", "")
+if LOKI_URL:
+    from loki_handler import LokiHandler
+    _log_handlers.append(LokiHandler(
+        url=LOKI_URL,
+        username=os.getenv("LOKI_USERNAME", ""),
+        password=os.getenv("LOKI_API_KEY", ""),
+        labels={
+            "job": "spymonk-warehouse-backend",
+            "app": "spymonk-warehouse",
+            "service": "spymonk-warehouse-backend",
+            "component": "backend",
+            "environment": settings.ENVIRONMENT,
+        },
+    ))
+
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(LOG_FILE_PATH),
-    ],
+    handlers=_log_handlers,
 )
 logger = logging.getLogger(__name__)
 
