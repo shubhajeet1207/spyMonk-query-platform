@@ -104,70 +104,73 @@
     A distributed SQL engine and analytical warehouse, built from first principles
   </text>
 
-  <!-- tech-stack badges: real pictograms, not text-only chips -->
+  <!-- tech-stack badges: real pictograms, not text-only chips.
+       Every label uses textLength so it renders at a fixed, safe width no
+       matter which fallback font the viewer's browser actually substitutes
+       for the font-family stack below. -->
   <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="600" fill="#e2e8f0">
 
     <!-- Python: two interlocking blocks with "eye" cutouts -->
-    <rect x="92" y="200" width="94" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
+    <rect x="92" y="200" width="114" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
     <g transform="translate(102,204)">
       <rect x="1" y="1" width="10" height="10" rx="3" fill="#3b82f6"/>
       <circle cx="8" cy="5" r="1.2" fill="#0b1220"/>
       <rect x="6" y="6" width="10" height="10" rx="3" fill="#fbbf24"/>
       <circle cx="10" cy="12" r="1.2" fill="#0b1220"/>
     </g>
-    <text x="128" y="217" text-anchor="start">Python</text>
+    <text x="128" y="217" text-anchor="start" textLength="60" lengthAdjust="spacingAndGlyphs">Python</text>
 
     <!-- TypeScript: the authentic minimal "TS" square mark -->
-    <rect x="196" y="200" width="124" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(206,204)">
+    <rect x="216" y="200" width="144" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
+    <g transform="translate(226,204)">
       <rect x="0" y="0" width="18" height="18" rx="3" fill="#3178c6"/>
-      <text x="9" y="13" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">TS</text>
+      <text x="9" y="13" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" textLength="12" lengthAdjust="spacingAndGlyphs">TS</text>
     </g>
-    <text x="234" y="217" text-anchor="start">TypeScript</text>
+    <text x="252" y="217" text-anchor="start" textLength="86" lengthAdjust="spacingAndGlyphs">TypeScript</text>
 
     <!-- Docker: simplified whale + containers -->
-    <rect x="330" y="200" width="94" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(340,204)" fill="#2496ed">
+    <rect x="370" y="200" width="114" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
+    <g transform="translate(380,204)" fill="#2496ed">
       <path d="M1,13 Q2,9 7,9 H16 Q18,9 18,11 V13 Q18,15 15,15 H4 Q1,15 1,13 Z"/>
       <rect x="5" y="5" width="3" height="3"/>
       <rect x="9" y="5" width="3" height="3"/>
       <rect x="9" y="1" width="3" height="3"/>
     </g>
-    <text x="366" y="217" text-anchor="start">Docker</text>
+    <text x="406" y="217" text-anchor="start" textLength="60" lengthAdjust="spacingAndGlyphs">Docker</text>
 
     <!-- GitHub Actions: pipeline/run icon -->
-    <rect x="434" y="200" width="102" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(444,204)">
+    <rect x="494" y="200" width="122" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
+    <g transform="translate(504,204)">
       <circle cx="9" cy="9" r="8" fill="none" stroke="#a78bfa" stroke-width="1.6"/>
       <path d="M7,5 L13,9 L7,13 Z" fill="#a78bfa"/>
     </g>
-    <text x="470" y="217" text-anchor="start">Actions</text>
+    <text x="530" y="217" text-anchor="start" textLength="66" lengthAdjust="spacingAndGlyphs">Actions</text>
 
     <!-- Prometheus: flame -->
-    <rect x="546" y="200" width="124" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(556,204)">
+    <rect x="626" y="200" width="144" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
+    <g transform="translate(636,204)">
       <path d="M9,1 C6,5 4,7 4,10 a5,5 0 0 0 10,0 C14,7 12,5 9,1 Z" fill="#e0663f"/>
       <path d="M9,7 C7.5,9 7,10.5 7,12 a2,2 0 0 0 4,0 c0,-1.5 -0.5,-3 -2,-5 Z" fill="#f7a072"/>
     </g>
-    <text x="582" y="217" text-anchor="start">Prometheus</text>
+    <text x="662" y="217" text-anchor="start" textLength="86" lengthAdjust="spacingAndGlyphs">Prometheus</text>
 
     <!-- Grafana: dashboard gauge -->
-    <rect x="680" y="200" width="102" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(690,204)">
+    <rect x="780" y="200" width="122" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
+    <g transform="translate(790,204)">
       <path d="M2,15 A7,7 0 0 1 16,15" fill="none" stroke="#f97316" stroke-width="2"/>
       <line x1="9" y1="15" x2="13" y2="9" stroke="#f97316" stroke-width="2"/>
       <circle cx="9" cy="15" r="1.6" fill="#f97316"/>
     </g>
-    <text x="716" y="217" text-anchor="start">Grafana</text>
+    <text x="816" y="217" text-anchor="start" textLength="66" lengthAdjust="spacingAndGlyphs">Grafana</text>
 
     <!-- Loki: log lines -->
-    <rect x="792" y="200" width="80" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(802,204)" fill="#7c9fd8">
+    <rect x="912" y="200" width="100" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
+    <g transform="translate(922,204)" fill="#7c9fd8">
       <rect x="0" y="3" width="14" height="2.2" rx="1"/>
       <rect x="0" y="8" width="10" height="2.2" rx="1"/>
       <rect x="0" y="13" width="12" height="2.2" rx="1"/>
     </g>
-    <text x="828" y="217" text-anchor="start">Loki</text>
+    <text x="948" y="217" text-anchor="start" textLength="46" lengthAdjust="spacingAndGlyphs">Loki</text>
   </g>
 
   <!-- component chips, each with a small engineering icon -->
@@ -179,16 +182,16 @@
       <path d="M1,3 V13 A8,2.6 0 0 0 17,13 V3"/>
       <path d="M1,8 A8,2.6 0 0 0 17,8"/>
     </g>
-    <text x="132" y="273" text-anchor="start">spyMonk-DB · Spanner-DB</text>
+    <text x="132" y="273" text-anchor="start" textLength="195" lengthAdjust="spacingAndGlyphs">spyMonk-DB · Spanner-DB</text>
 
     <!-- spyMonk-warehouse -->
-    <rect x="370" y="250" width="378" height="36" rx="18" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/>
+    <rect x="370" y="250" width="430" height="36" rx="18" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/>
     <g transform="translate(388,259)" fill="none" stroke="#a78bfa" stroke-width="1.6">
       <rect x="0" y="0" width="18" height="14" rx="2"/>
       <line x1="6" y1="0" x2="6" y2="14"/>
       <line x1="12" y1="0" x2="12" y2="14"/>
       <line x1="0" y1="7" x2="18" y2="7"/>
     </g>
-    <text x="410" y="273" text-anchor="start">spyMonk-warehouse · Snowflake-inspired</text>
+    <text x="410" y="273" text-anchor="start" textLength="350" lengthAdjust="spacingAndGlyphs">spyMonk-warehouse · Snowflake-inspired</text>
   </g>
 </svg>
