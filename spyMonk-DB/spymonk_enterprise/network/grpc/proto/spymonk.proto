@@ -1,0 +1,246 @@
+/*
+SpyMonk-DB gRPC Protocol Definitions
+
+Main RPC interface for client-server and server-server communication.
+*/
+
+syntax = "proto3";
+
+package spymonk;
+
+// ============================================================================
+// Client API Service
+// ============================================================================
+
+service SpyMonkDB {
+  // Transaction operations
+  rpc BeginTransaction(BeginTransactionRequest) returns (BeginTransactionResponse);
+  rpc CommitTransaction(CommitTransactionRequest) returns (CommitTransactionResponse);
+  rpc AbortTransaction(AbortTransactionRequest) returns (AbortTransactionResponse);
+
+  // Data operations
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc Put(PutRequest) returns (PutResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Scan(ScanRequest) returns (stream ScanResponse);
+
+  // SQL operations
+  rpc ExecuteSQL(ExecuteSQLRequest) returns (ExecuteSQLResponse);
+  rpc ExecuteQuery(ExecuteQueryRequest) returns (stream QueryRow);
+
+  // Batch operations
+  rpc BatchWrite(BatchWriteRequest) returns (BatchWriteResponse);
+}
+
+// ============================================================================
+// Replication Service (Server-to-Server)
+// ============================================================================
+
+service ReplicationService {
+  // Paxos messages
+  rpc Prepare(PrepareRequest) returns (PrepareResponse);
+  rpc Accept(AcceptRequest) returns (AcceptResponse);
+  rpc Commit(CommitRequest) returns (CommitResponse);
+
+  // Log replication
+  rpc AppendEntries(AppendEntriesRequest) returns (AppendEntriesResponse);
+  rpc InstallSnapshot(stream SnapshotChunk) returns (InstallSnapshotResponse);
+}
+
+// ============================================================================
+// Messages
+// ============================================================================
+
+// Timestamp (Hybrid Logical Clock)
+message Timestamp {
+  int64 physical = 1;
+  int64 logical = 2;
+  int64 uncertainty_ns = 3;
+}
+
+// Transaction messages
+message BeginTransactionRequest {
+  bool read_only = 1;
+  Timestamp read_timestamp = 2;  // For read-only transactions
+}
+
+message BeginTransactionResponse {
+  string transaction_id = 1;
+  Timestamp start_timestamp = 2;
+}
+
+message CommitTransactionRequest {
+  string transaction_id = 1;
+}
+
+message CommitTransactionResponse {
+  bool success = 1;
+  Timestamp commit_timestamp = 2;
+}
+
+message AbortTransactionRequest {
+  string transaction_id = 1;
+}
+
+message AbortTransactionResponse {
+  bool success = 1;
+}
+
+// Data operation messages
+message GetRequest {
+  bytes key = 1;
+  string transaction_id = 2;
+  Timestamp read_timestamp = 3;
+}
+
+message GetResponse {
+  bytes value = 1;
+  bool found = 2;
+  Timestamp version_timestamp = 3;
+}
+
+message PutRequest {
+  bytes key = 1;
+  bytes value = 2;
+  string transaction_id = 3;
+}
+
+message PutResponse {
+  bool success = 1;
+  Timestamp timestamp = 2;
+}
+
+message DeleteRequest {
+  bytes key = 1;
+  string transaction_id = 2;
+}
+
+message DeleteResponse {
+  bool success = 1;
+  Timestamp timestamp = 2;
+}
+
+message ScanRequest {
+  bytes start_key = 1;
+  bytes end_key = 2;
+  int32 limit = 3;
+  string transaction_id = 4;
+  Timestamp read_timestamp = 5;
+}
+
+message ScanResponse {
+  bytes key = 1;
+  bytes value = 2;
+  Timestamp version_timestamp = 3;
+}
+
+// SQL messages
+message ExecuteSQLRequest {
+  string sql = 1;
+  string transaction_id = 2;
+}
+
+message ExecuteSQLResponse {
+  repeated QueryRow rows = 1;
+  int32 affected_rows = 2;
+}
+
+message ExecuteQueryRequest {
+  string sql = 1;
+  string transaction_id = 2;
+}
+
+message QueryRow {
+  map<string, bytes> columns = 1;
+}
+
+// Batch operations
+message BatchWriteRequest {
+  repeated PutRequest puts = 1;
+  repeated DeleteRequest deletes = 2;
+  string transaction_id = 3;
+}
+
+message BatchWriteResponse {
+  bool success = 1;
+  int32 mutations_applied = 2;
+}
+
+// ============================================================================
+// Paxos Messages
+// ============================================================================
+
+message PrepareRequest {
+  string group_id = 1;
+  int64 proposal_number = 2;
+  string proposer_id = 3;
+}
+
+message PrepareResponse {
+  bool promised = 1;
+  int64 proposal_number = 2;
+  bytes accepted_value = 3;
+  int64 accepted_proposal_number = 4;
+}
+
+message AcceptRequest {
+  string group_id = 1;
+  int64 proposal_number = 2;
+  bytes value = 3;
+  Timestamp timestamp = 4;
+}
+
+message AcceptResponse {
+  bool accepted = 1;
+  int64 proposal_number = 2;
+}
+
+message CommitRequest {
+  string group_id = 1;
+  int64 log_index = 2;
+  bytes value = 3;
+}
+
+message CommitResponse {
+  bool success = 1;
+}
+
+// ============================================================================
+// Log Replication Messages
+// ============================================================================
+
+message LogEntry {
+  int64 index = 1;
+  int64 term = 2;
+  bytes command = 3;
+  Timestamp timestamp = 4;
+}
+
+message AppendEntriesRequest {
+  string group_id = 1;
+  string leader_id = 2;
+  int64 term = 3;
+  int64 prev_log_index = 4;
+  int64 prev_log_term = 5;
+  repeated LogEntry entries = 6;
+  int64 leader_commit = 7;
+}
+
+message AppendEntriesResponse {
+  bool success = 1;
+  int64 term = 2;
+  int64 match_index = 3;
+}
+
+message SnapshotChunk {
+  string group_id = 1;
+  int64 last_included_index = 2;
+  int64 last_included_term = 3;
+  bytes data = 4;
+  bool is_last_chunk = 5;
+}
+
+message InstallSnapshotResponse {
+  bool success = 1;
+  int64 term = 2;
+}

@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spymonk-db-enterprise"
+version = "0.2.0"
+description = "Spanner-inspired distributed database with external consistency"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Shubhajeet Pradhan"}
+]
+keywords = ["database", "distributed", "spanner", "sql", "nosql", "paxos", "mvcc"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Database :: Database Engines/Servers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+]
+
+# Only packages the code actually imports. grpcio-tools (protoc) is a dev
+# tool used by scripts/generate_grpc.sh, not a runtime dependency.
+dependencies = [
+    "grpcio>=1.60.0",
+    "protobuf>=4.25.1",
+    "msgpack>=1.1.0",
+    "ntplib>=0.4.0",
+    "sqlparse>=0.5.0",
+    "prometheus-client>=0.19.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "grpcio-tools>=1.60.0",
+    "build>=1.0.0",
+    "black>=23.7.0",
+    "flake8>=6.1.0",
+    "mypy>=1.5.0",
+    "isort>=5.12.0",
+]
+performance = [
+    "locust>=2.15.1",
+    "py-spy>=0.3.14",
+]
+
+[project.urls]
+Homepage = "https://gitlab.com/shubhajeet.pradhan/spymonk-db2.0"
+Documentation = "https://gitlab.com/shubhajeet.pradhan/spymonk-db2.0#readme"
+Repository = "https://gitlab.com/shubhajeet.pradhan/spymonk-db2.0"
+"Bug Tracker" = "https://gitlab.com/shubhajeet.pradhan/spymonk-db2.0/-/issues"
+
+[project.scripts]
+spymonk-server = "spymonk_enterprise.spanserver.server_cli:main"
+spymonk-cli = "spymonk_enterprise.client.cli:main"
+spymonk-admin = "spymonk_enterprise.admin.admin_cli:cli"
+
+[tool.setuptools]
+packages = {find = {include = ["spymonk_enterprise*"], exclude = ["tests*", "benchmarks*", "docs*", "examples*"]}}
+
+[tool.setuptools.package-data]
+spymonk_enterprise = ["py.typed", "**/*.proto"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311', 'py312']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"

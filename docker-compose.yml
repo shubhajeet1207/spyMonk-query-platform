@@ -1,0 +1,34 @@
+# spyMonk-warehouse application stack.
+#
+#   docker compose up --build
+#
+# The build context is this repo root so the image can include the sibling
+# spyMonk-DB library. For log shipping + dashboards, also start the
+# monitoring stack: docker compose -f docker-compose.monitoring.yml up -d
+
+services:
+  warehouse:
+    build:
+      context: .
+      dockerfile: spyMonk-warehouse/Dockerfile
+    container_name: spymonk-warehouse
+    ports:
+      - "8000:8000"
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DATABASE_PATH: /data/spymonk_warehouse_db
+      # Comma-separated API keys clients must send as X-API-Key.
+      ALLOWED_API_KEYS: ${ALLOWED_API_KEYS:-}
+      # Only needed when the frontend is served from a different origin.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      # Optional AI SQL assistant (OpenAI-compatible endpoint).
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com/v1}
+      AI_MODEL: ${AI_MODEL:-gpt-4o-mini}
+    volumes:
+      - warehouse-data:/data
+      # Promtail (monitoring stack) tails this host directory.
+      - ./spyMonk-warehouse/backend/logs:/app/backend/logs
+
+volumes:
+  warehouse-data:

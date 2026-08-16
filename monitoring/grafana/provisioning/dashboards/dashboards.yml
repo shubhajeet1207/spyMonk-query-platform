@@ -1,0 +1,15 @@
+apiVersion: 1
+
+providers:
+  - name: spymonk
+    orgId: 1
+    folder: spyMonk
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      # This path is inside the Grafana container; the provisioning dir is
+      # bind-mounted at /etc/grafana/provisioning (see docker-compose.monitoring.yml).
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

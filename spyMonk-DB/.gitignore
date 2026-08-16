@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Logs
+*.log
+db.log
+
+# Temporary files
+*.tmp
+file.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# spyMonk-DB specific
+/data/
+/tmp/
+*.db
+*.wal
+
+# Local AI-assistant working files
+.superpowers/
+docs/superpowers/

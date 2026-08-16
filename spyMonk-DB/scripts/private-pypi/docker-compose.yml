@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # PyPI Server - Private Python Package Repository
+  pypi-server:
+    image: pypiserver/pypiserver:latest
+    container_name: spymonk-pypi-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./packages:/data/packages
+      - ./htpasswd:/data/.htpasswd
+    environment:
+      # Authentication (comment out for no auth in development)
+      - PYPISERVER_PASSWORDS=/data/.htpasswd
+    command: >
+      run
+      --passwords /data/.htpasswd
+      --authenticate upload
+      --port 8080
+      /data/packages
+    restart: unless-stopped
+    networks:
+      - pypi-net
+
+networks:
+  pypi-net:
+    driver: bridge
+
+volumes:
+  packages:

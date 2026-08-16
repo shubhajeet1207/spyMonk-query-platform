@@ -1,0 +1,32 @@
+# Keep the Docker build context small: only spyMonk-DB and spyMonk-warehouse
+# sources matter to the image.
+
+# VCS and editor
+**/.git
+**/.idea
+**/.vscode
+
+# Python junk
+**/__pycache__
+**/*.pyc
+**/venv
+**/.venv
+**/build
+**/dist
+**/*.egg-info
+**/.pytest_cache
+
+# Node junk
+**/node_modules
+
+# Local data, logs, env files
+**/logs/*.log
+**/data
+**/.env
+**/.env.local
+spyMonk-warehouse/large_sales_data.csv
+
+# Non-code directories at the repo root
+monitoring
+spanner.pdf
+*.md

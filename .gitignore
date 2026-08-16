@@ -1,0 +1,36 @@
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf
+
+# Secrets / local env (templates like .env.example stay tracked)
+**/.env
+**/.env.local
+**/.env.production
+
+# Dependencies & build artifacts
+**/node_modules
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/dist
+**/*.egg-info
+**/.pytest_cache
+
+# Local data, logs, OS junk
+**/logs/*.log
+**/*.log
+**/data
+**/.DS_Store

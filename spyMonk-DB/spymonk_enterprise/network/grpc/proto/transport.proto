@@ -1,0 +1,10 @@
+syntax = "proto3";
+package spymonk.transport;
+
+service PaxosTransport {
+  rpc Send (TransportEnvelope) returns (TransportEnvelope);
+}
+
+message TransportEnvelope {
+  bytes payload = 1;  // msgpack: {"type": str, "fields": {...}}
+}

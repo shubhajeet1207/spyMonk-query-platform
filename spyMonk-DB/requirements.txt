@@ -1,0 +1,6 @@
+# Dependencies are declared in pyproject.toml (single source of truth).
+# This file exists as a convenience for setting up a development environment:
+#
+#   python -m pip install -r requirements.txt
+#
+-e .[dev]
