@@ -1,0 +1,36 @@
+name: spyMonk-warehouse backend
+
+# spyMonk-warehouse had no CI before; this adds a test stage equivalent to
+# the pattern in spyMonk-DB/.gitlab-ci.yml. The backend depends on spyMonk-DB
+# (installed editable, same as local dev — see spyMonk-warehouse/backend/requirements.txt),
+# so changes there also trigger this workflow.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "spyMonk-warehouse/backend/**"
+      - "spyMonk-DB/**"
+      - ".github/workflows/spymonk-warehouse-backend.yml"
+  pull_request:
+    paths:
+      - "spyMonk-warehouse/backend/**"
+      - "spyMonk-DB/**"
+      - ".github/workflows/spymonk-warehouse-backend.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install spyMonk-DB (editable)
+        run: pip install -e ./spyMonk-DB
+      - name: Install backend dependencies
+        working-directory: spyMonk-warehouse/backend
+        run: pip install -r requirements-dev.txt
+      - name: Run tests
+        working-directory: spyMonk-warehouse/backend
+        run: python -m pytest -v

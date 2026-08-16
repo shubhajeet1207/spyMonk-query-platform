@@ -1,0 +1,45 @@
+name: spyMonk-warehouse frontend
+
+# Lint + build the React app. No prior CI existed for this half of the
+# monorepo; this fills that gap alongside the backend workflow.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "spyMonk-warehouse/src/**"
+      - "spyMonk-warehouse/public/**"
+      - "spyMonk-warehouse/package.json"
+      - "spyMonk-warehouse/package-lock.json"
+      - "spyMonk-warehouse/*.config.*"
+      - "spyMonk-warehouse/tsconfig*.json"
+      - "spyMonk-warehouse/index.html"
+      - ".github/workflows/spymonk-warehouse-frontend.yml"
+  pull_request:
+    paths:
+      - "spyMonk-warehouse/src/**"
+      - "spyMonk-warehouse/public/**"
+      - "spyMonk-warehouse/package.json"
+      - "spyMonk-warehouse/package-lock.json"
+      - "spyMonk-warehouse/*.config.*"
+      - "spyMonk-warehouse/tsconfig*.json"
+      - "spyMonk-warehouse/index.html"
+      - ".github/workflows/spymonk-warehouse-frontend.yml"
+
+defaults:
+  run:
+    working-directory: spyMonk-warehouse
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: spyMonk-warehouse/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
