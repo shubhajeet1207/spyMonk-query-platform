@@ -92,10 +92,10 @@ Set in `backend/.env` (see `backend/.env.example` for the full list):
 
 ## Docker
 
-The image bundles the built frontend and the backend in one process, and needs the sibling `spyMonk-DB` directory — so build from the **repo root** (the parent of this directory):
+The image bundles the built frontend and the backend in one process, and needs the sibling `spyMonk-DB` directory — so build from the **repo root** (the parent of this directory), where the `Dockerfile` lives:
 
 ```bash
-docker build -f spyMonk-warehouse/Dockerfile -t spymonk-warehouse .
+docker build -t spymonk-warehouse .
 # or, simpler:
 docker compose up --build          # uses docker-compose.yml at the repo root
 ```

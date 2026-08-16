@@ -10,12 +10,17 @@ services:
   warehouse:
     build:
       context: .
-      dockerfile: spyMonk-warehouse/Dockerfile
+      dockerfile: Dockerfile
     container_name: spymonk-warehouse
     ports:
       - "8000:8000"
     environment:
       ENVIRONMENT: ${ENVIRONMENT:-production}
+      # Pinned to match the "8000:8000" port mapping above and every doc,
+      # dashboard, and Prometheus scrape target that assumes :8000 locally.
+      # Deployed hosts (Render/Railway/Cloud Run) override PORT themselves;
+      # Hugging Face Spaces gets the Dockerfile's 7860 default instead.
+      PORT: "8000"
       DATABASE_PATH: /data/spymonk_warehouse_db
       # Comma-separated API keys clients must send as X-API-Key.
       ALLOWED_API_KEYS: ${ALLOWED_API_KEYS:-}

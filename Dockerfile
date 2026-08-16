@@ -1,11 +1,14 @@
 # spyMonk-warehouse — unified frontend + backend image.
 #
-# IMPORTANT: build from the REPO ROOT (the parent of spyMonk-warehouse/),
-# because the image needs the sibling spyMonk-DB library:
+# Lives at the repo root (not inside spyMonk-warehouse/) because the build
+# needs the sibling spyMonk-DB library as build context:
 #
-#   docker build -f spyMonk-warehouse/Dockerfile -t spymonk-warehouse .
+#   docker build -t spymonk-warehouse .
 #
 # or simply:  docker compose up --build   (see docker-compose.yml at repo root)
+#
+# Listens on $PORT if the host sets one (Render, Railway, Cloud Run all do);
+# falls back to 7860 (Hugging Face Spaces' default) otherwise.
 
 # Stage 1: build the React frontend
 FROM node:20-slim AS frontend-build
@@ -43,14 +46,15 @@ RUN useradd --create-home appuser \
     && chown -R appuser:appuser /data /app/backend
 USER appuser
 
-EXPOSE 8000
+EXPOSE 7860
 
 ENV DATABASE_PATH=/data/spymonk_warehouse_db \
     ENVIRONMENT=production \
-    FRONTEND_DIST_PATH=/app/frontend_dist
+    FRONTEND_DIST_PATH=/app/frontend_dist \
+    PORT=7860
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"
+    CMD python -c "import os,urllib.request; urllib.request.urlopen(f'http://127.0.0.1:{os.environ.get(\"PORT\",\"7860\")}/health')"
 
 WORKDIR /app/backend
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}"]
