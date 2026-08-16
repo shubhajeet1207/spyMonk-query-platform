@@ -1,0 +1,27 @@
+// Grafana Alloy config, templated by entrypoint.sh at container startup
+// (placeholders below are replaced with real values via sed — Alloy's own
+// env() support isn't relied on here to keep this easy to verify).
+//
+// Scrapes this app's own /metrics and remote_writes the samples to
+// Grafana Cloud Prometheus. This file only exists rendered at
+// /tmp/alloy-config.alloy when GC_PROMETHEUS_URL is set.
+
+prometheus.scrape "app" {
+  targets = [
+    {"__address__" = "127.0.0.1:__PORT__"},
+  ]
+  metrics_path    = "/metrics"
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = "__GC_PROMETHEUS_URL__"
+
+    basic_auth {
+      username = "__GC_PROMETHEUS_USER__"
+      password = "__GC_PROMETHEUS_API_KEY__"
+    }
+  }
+}

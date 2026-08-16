@@ -12,12 +12,16 @@ on:
       - "spyMonk-DB/**"
       - "spyMonk-warehouse/**"
       - "Dockerfile"
+      - "entrypoint.sh"
+      - "alloy-config.alloy.template"
       - ".github/workflows/docker-build.yml"
   pull_request:
     paths:
       - "spyMonk-DB/**"
       - "spyMonk-warehouse/**"
       - "Dockerfile"
+      - "entrypoint.sh"
+      - "alloy-config.alloy.template"
       - ".github/workflows/docker-build.yml"
 
 jobs:
