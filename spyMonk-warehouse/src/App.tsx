@@ -685,7 +685,7 @@ function App() {
     <div className="app">
       {/* Taskbar */}
       <header className="taskbar">
-        <Logo size={34} style={{ color: 'var(--logo)', display: 'block' }} />
+        <Logo size={40} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
           <h1 className="taskbar-title">
             spyMonk <span>warehouse</span>
