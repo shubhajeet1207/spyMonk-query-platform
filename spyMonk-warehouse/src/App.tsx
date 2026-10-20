@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import Editor, { type OnMount, type BeforeMount } from '@monaco-editor/react';
 import { strToU8, zipSync } from 'fflate';
-import { Play, Database, FileText, Table, Square, Download, Sparkles, Trash2, MoreVertical, Info, Eye, X } from 'lucide-react';
+import { Play, Database, Square, Download, Sparkles, Trash2, MoreVertical, Info, Eye, X, AlertCircle } from 'lucide-react';
 import Logo from './components/Logo';
 import Uploader from './components/Uploader';
 import DataTable from './components/DataTable';
+import RetroWindow, { Sparkle } from './components/RetroWindow';
 import { API_BASE_URL, getAuthHeaders } from './config/api';
 
 interface QueryResult {
@@ -195,38 +196,48 @@ const buildXlsx = (columns: string[], rows: Record<string, unknown>[]): Uint8Arr
   });
 };
 
-// Cool, low-contrast Monaco theme matching the pastel palette.
+// Monaco theme for the retro desktop: ink on the cream window, brick
+// keywords. Every token colour clears 4.5:1 on #FFFAF3.
 const defineEditorTheme: BeforeMount = (monaco) => {
-  monaco.editor.defineTheme('spymonkLight', {
+  monaco.editor.defineTheme('spymonkRetro', {
     base: 'vs',
     inherit: true,
     rules: [
-      { token: '', foreground: '2E3547' },
-      { token: 'keyword', foreground: '345F82', fontStyle: 'bold' },
-      { token: 'operator', foreground: '345F82' },
-      { token: 'predefined', foreground: '345F82' },
-      { token: 'string.sql', foreground: '2E7D74' },
-      { token: 'string', foreground: '2E7D74' },
-      { token: 'number', foreground: 'A83E30' },
-      { token: 'comment', foreground: '7C8698', fontStyle: 'italic' },
+      { token: '', foreground: '201A3A' },
+      { token: 'keyword', foreground: 'A63426', fontStyle: 'bold' },
+      { token: 'operator', foreground: '7E4596' },
+      { token: 'predefined', foreground: '7E4596' },
+      { token: 'string.sql', foreground: '1F6B74' },
+      { token: 'string', foreground: '1F6B74' },
+      { token: 'number', foreground: '8F4A00' },
+      { token: 'comment', foreground: '6E6475', fontStyle: 'italic' },
+      { token: 'string.key.json', foreground: '7E4596' },
+      { token: 'string.value.json', foreground: '1F6B74' },
+      { token: 'keyword.json', foreground: 'A63426' },
     ],
     colors: {
-      'editor.background': '#FFFFFF',
-      'editor.foreground': '#2E3547',
-      'editorLineNumber.foreground': '#9AA3B4',
-      'editorLineNumber.activeForeground': '#566072',
-      'editor.selectionBackground': '#DCEAF4',
-      'editor.lineHighlightBackground': '#F4F7FC',
+      'editor.background': '#FFFAF3',
+      'editor.foreground': '#201A3A',
+      'editorLineNumber.foreground': '#6E6475',
+      'editorLineNumber.activeForeground': '#201A3A',
+      'editor.selectionBackground': '#F2B75580',
+      'editor.inactiveSelectionBackground': '#F2B75540',
+      'editor.lineHighlightBackground': '#FBEEDD',
       'editor.lineHighlightBorder': '#00000000',
-      'editorCursor.foreground': '#3F6D91',
-      'editorIndentGuide.background': '#E7ECF4',
-      'editorIndentGuide.activeBackground': '#D3DBE8',
-      'editorGutter.background': '#FFFFFF',
-      'editorWidget.background': '#FFFFFF',
-      'editorWidget.border': '#D3DBE8',
-      'editorSuggestWidget.background': '#FFFFFF',
-      'editorSuggestWidget.border': '#D3DBE8',
-      'editorSuggestWidget.selectedBackground': '#DCEAF4',
+      'editorCursor.foreground': '#A63426',
+      'editorIndentGuide.background': '#EAD6C6',
+      'editorIndentGuide.activeBackground': '#C9B1A0',
+      'editorGutter.background': '#FFF4E7',
+      'editorWidget.background': '#FFFAF3',
+      'editorWidget.border': '#201A3A',
+      'editorSuggestWidget.background': '#FFFAF3',
+      'editorSuggestWidget.border': '#201A3A',
+      'editorSuggestWidget.selectedBackground': '#FDE7C2',
+      'editorSuggestWidget.selectedForeground': '#201A3A',
+      'editorSuggestWidget.highlightForeground': '#A63426',
+      'scrollbarSlider.background': '#F79D4799',
+      'scrollbarSlider.hoverBackground': '#F79D47CC',
+      'scrollbarSlider.activeBackground': '#F05B43CC',
     },
   });
 };
@@ -665,114 +676,76 @@ function App() {
   };
 
   const canRun = !isExecuting && !!query.trim();
-
-  const sectionLabelStyle: React.CSSProperties = {
-    fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase',
-    letterSpacing: '0.07em', color: 'var(--ink-2)',
-  };
+  const totalRows = tables.reduce((sum, table) => sum + table.record_count, 0);
+  // Cancelling is the user's own action, so it gets the quiet tan notice
+  // rather than the orange "Error" window.
+  const queryCancelled = error === 'Query cancelled.';
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--paper-0)', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-sans)', color: 'var(--ink-0)' }}>
-      {/* Header */}
-      <header style={{
-        display: 'flex', alignItems: 'center', gap: '0.85rem',
-        padding: '0.7rem 1.5rem',
-        background: 'var(--paper-1)',
-        borderBottom: '1px solid var(--line)',
-      }}>
+    <div className="app">
+      {/* Taskbar */}
+      <header className="taskbar">
         <Logo size={34} style={{ color: 'var(--logo)', display: 'block' }} />
-        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 600, color: 'var(--ink-0)', letterSpacing: '-0.01em' }}>
-            spyMonk <span style={{ fontWeight: 400, color: 'var(--ink-1)' }}>warehouse</span>
-          </span>
-          <span style={{ fontSize: '0.7rem', color: 'var(--ink-2)', letterSpacing: '0.02em' }}>
-            upload · query · explore your data
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+          <h1 className="taskbar-title">
+            spyMonk <span>warehouse</span>
+          </h1>
+          <span className="eyebrow">upload · query · explore your data</span>
+        </div>
+        <div className="taskbar-status">
+          <span className="chip chip--cream chip--raised">
+            {tables.length} {tables.length === 1 ? 'table' : 'tables'} · {totalRows.toLocaleString()} rows
           </span>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '288px 1fr', overflow: 'hidden' }}>
+      {/* The desk */}
+      <div className="desk">
 
-        {/* Left Sidebar */}
-        <aside style={{
-          background: 'var(--paper-1)',
-          borderRight: '1px solid var(--line)',
-          display: 'flex', flexDirection: 'column',
-          overflowY: 'auto', padding: '1.35rem',
-          gap: '1.75rem',
-        }}>
-
-          {/* Ingest Data */}
-          <section>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
-              <FileText style={{ width: 15, height: 15, color: 'var(--ink-2)' }} />
-              <span style={sectionLabelStyle}>Ingest data</span>
-            </div>
+        {/* Left column: ingest + the table "hard disk" */}
+        <aside className="desk-col desk-col--side" aria-label="Data sources">
+          <RetroWindow title="Ingest data" tone="orange" className="win--fixed" bodyClassName="win-body--pad">
             <Uploader onUploadSuccess={handleUploadSuccess} />
-          </section>
+          </RetroWindow>
 
-          {/* Available Tables */}
-          <section style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem' }}>
-              <Table style={{ width: 15, height: 15, color: 'var(--ink-2)' }} />
-              <span style={sectionLabelStyle}>Available tables</span>
-            </div>
-
+          <RetroWindow title="Available tables" tone="lavender" className="tables-window" bodyClassName="win-body--scroll">
             {tables.length === 0 ? (
-              <p style={{ color: 'var(--ink-2)', fontSize: '0.82rem', lineHeight: 1.5, paddingLeft: '0.1rem' }}>
-                No tables yet. Upload a file above to get started.
-              </p>
+              <div className="state" style={{ padding: '1.75rem 1rem' }}>
+                <span className="folder folder--lg" aria-hidden="true" />
+                <p className="state-text">No tables yet. Upload a file above to get started.</p>
+              </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div className="table-list">
                 {tables.map((t, idx) => {
                   const confirming = confirmDeleteTable === t.name;
                   const deleting = deletingTable === t.name;
                   return (
-                  <div key={idx} style={{
-                    background: confirming ? 'var(--danger-soft)' : 'var(--paper-2)',
-                    border: `1px solid ${confirming ? 'var(--danger-line)' : 'var(--line)'}`,
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.8rem 0.85rem',
-                    transition: 'border-color 0.15s ease, background 0.15s ease',
-                  }}
-                    onMouseEnter={confirming ? undefined : e => { e.currentTarget.style.borderColor = 'var(--accent-line)'; }}
-                    onMouseLeave={confirming ? undefined : e => { e.currentTarget.style.borderColor = 'var(--line)'; }}
-                  >
+                  <div key={idx} className={confirming ? 'tcard tcard--confirm' : 'tcard'}>
                     {confirming ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
-                        <div style={{ fontSize: '0.83rem', color: 'var(--ink-0)', lineHeight: 1.45 }}>
-                          Delete <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, wordBreak: 'break-all' }}>{t.name}</span>?
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                        <div style={{ fontSize: '0.86rem', lineHeight: 1.45 }}>
+                          Delete <code style={{ wordBreak: 'break-all' }}>{t.name}</code>?
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: 'var(--ink-1)', lineHeight: 1.5 }}>
+                        <p style={{ fontSize: '0.76rem', color: 'var(--ink-1)', lineHeight: 1.5 }}>
                           Removes the table and all {t.record_count.toLocaleString()} rows. This can’t be undone.
-                        </div>
+                        </p>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <button
                             type="button"
+                            className="btn btn-sm btn-block"
                             disabled={deleting}
                             onClick={() => setConfirmDeleteTable(null)}
                             aria-label={`Keep table ${t.name}`}
-                            style={{
-                              flex: 1, padding: '0.42rem 0', borderRadius: '6px',
-                              background: 'var(--paper-1)', border: '1px solid var(--line)',
-                              color: 'var(--ink-0)', cursor: deleting ? 'not-allowed' : 'pointer',
-                              fontSize: '0.77rem', fontWeight: 600, fontFamily: 'var(--font-sans)',
-                            }}
                           >
                             Cancel
                           </button>
                           <button
                             type="button"
+                            className="btn btn-sm btn-block btn-danger"
                             disabled={deleting}
+                            aria-busy={deleting}
                             onClick={() => handleDeleteTable(t.name)}
                             aria-label={`Confirm delete table ${t.name}`}
-                            style={{
-                              flex: 1, padding: '0.42rem 0', borderRadius: '6px',
-                              background: 'var(--danger)', border: '1px solid var(--danger)',
-                              color: '#fff', cursor: deleting ? 'wait' : 'pointer',
-                              fontSize: '0.77rem', fontWeight: 600, fontFamily: 'var(--font-sans)',
-                            }}
                           >
                             {deleting ? 'Deleting…' : 'Delete'}
                           </button>
@@ -780,92 +753,49 @@ function App() {
                       </div>
                     ) : (
                       <>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.55rem' }}>
-                          <span
-                            title={t.name}
-                            style={{
-                              color: 'var(--ink-0)', fontSize: '0.85rem', fontWeight: 600,
-                              fontFamily: 'var(--font-mono)',
-                              flex: 1, minWidth: 0,
-                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                            }}
-                          >
+                        <div className="tcard-head">
+                          <span className="folder" aria-hidden="true" />
+                          <span className="mono-name" title={t.name} style={{ flex: 1 }}>
                             {t.name}
                           </span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-                            <span style={{ color: 'var(--ink-2)', fontSize: '0.72rem', fontFamily: 'var(--font-mono)' }}>{t.record_count.toLocaleString()} rows</span>
-                            <div style={{ position: 'relative' }} data-menu-root>
-                              <button
-                                type="button"
-                                onClick={() => setOpenMenuTable(open => (open === t.name ? null : t.name))}
-                                aria-label={`Actions for table ${t.name}`}
-                                aria-haspopup="menu"
-                                aria-expanded={openMenuTable === t.name}
-                                title="Table actions"
-                                style={{
-                                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                                  width: 24, height: 24,
-                                  background: openMenuTable === t.name ? 'var(--paper-hover)' : 'none',
-                                  border: 'none', borderRadius: 'var(--radius-xs)',
-                                  color: 'var(--ink-2)', cursor: 'pointer', padding: 0,
-                                  transition: 'color 0.15s ease, background 0.15s ease',
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.color = 'var(--ink-0)'; e.currentTarget.style.background = 'var(--paper-hover)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.color = 'var(--ink-2)'; if (openMenuTable !== t.name) e.currentTarget.style.background = 'none'; }}
-                              >
-                                <MoreVertical style={{ width: 15, height: 15 }} />
-                              </button>
-                              {openMenuTable === t.name && (
-                                <div
-                                  role="menu"
-                                  aria-label={`Actions for table ${t.name}`}
-                                  style={{
-                                    position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 30,
-                                    minWidth: 160,
-                                    background: 'var(--paper-1)',
-                                    border: '1px solid var(--line)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    boxShadow: 'var(--shadow-md)',
-                                    padding: '0.3rem',
-                                    display: 'flex', flexDirection: 'column', gap: '0.1rem',
-                                  }}
-                                >
-                                  {([
-                                    { label: 'Details', icon: Info, danger: false, onPick: () => openDetails(t.name) },
-                                    { label: 'View file', icon: Eye, danger: false, onPick: () => openFileView(t.name) },
-                                    { label: 'Delete file', icon: Trash2, danger: true, onPick: () => { setOpenMenuTable(null); setConfirmDeleteTable(t.name); } },
-                                  ]).map(item => (
-                                    <button
-                                      key={item.label}
-                                      type="button"
-                                      role="menuitem"
-                                      onClick={item.onPick}
-                                      style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                        width: '100%', padding: '0.42rem 0.55rem',
-                                        background: 'none', border: 'none',
-                                        borderRadius: 'var(--radius-xs)',
-                                        color: item.danger ? 'var(--danger)' : 'var(--ink-0)',
-                                        cursor: 'pointer', textAlign: 'left',
-                                        fontSize: '0.8rem', fontWeight: 500,
-                                        fontFamily: 'var(--font-sans)',
-                                        transition: 'background 0.15s ease',
-                                      }}
-                                      onMouseEnter={e => { e.currentTarget.style.background = item.danger ? 'var(--danger-soft)' : 'var(--paper-hover)'; }}
-                                      onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
-                                    >
-                                      <item.icon style={{ width: 14, height: 14, flexShrink: 0 }} />
-                                      {item.label}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
+                          <span className="meta-mono">{t.record_count.toLocaleString()} rows</span>
+                          <div style={{ position: 'relative' }} data-menu-root>
+                            <button
+                              type="button"
+                              className="btn-ghost-icon"
+                              onClick={() => setOpenMenuTable(open => (open === t.name ? null : t.name))}
+                              aria-label={`Actions for table ${t.name}`}
+                              aria-haspopup="menu"
+                              aria-expanded={openMenuTable === t.name}
+                              title="Table actions"
+                            >
+                              <MoreVertical aria-hidden="true" />
+                            </button>
+                            {openMenuTable === t.name && (
+                              <div role="menu" aria-label={`Actions for table ${t.name}`} className="menu">
+                                {([
+                                  { label: 'Details', icon: Info, danger: false, onPick: () => openDetails(t.name) },
+                                  { label: 'View file', icon: Eye, danger: false, onPick: () => openFileView(t.name) },
+                                  { label: 'Delete file', icon: Trash2, danger: true, onPick: () => { setOpenMenuTable(null); setConfirmDeleteTable(t.name); } },
+                                ]).map(item => (
+                                  <button
+                                    key={item.label}
+                                    type="button"
+                                    role="menuitem"
+                                    onClick={item.onPick}
+                                    className={item.danger ? 'menu-item menu-item--danger' : 'menu-item'}
+                                  >
+                                    <item.icon aria-hidden="true" />
+                                    {item.label}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div style={{ fontSize: '0.66rem', color: 'var(--ink-2)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                        <div className="eyebrow" style={{ marginBottom: '0.4rem' }}>
                           Columns
-                          <span style={{ marginLeft: '0.35rem', color: 'var(--ink-2)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                          <span style={{ marginLeft: '0.35rem', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
                             ({t.columns.length})
                           </span>
                         </div>
@@ -875,49 +805,18 @@ function App() {
                           const hasMore = t.columns.length > COLUMNS_PREVIEW_LIMIT;
                           return (
                             <>
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  flexWrap: 'wrap',
-                                  gap: '0.3rem',
-                                  ...(isExpanded ? {
-                                    maxHeight: '120px',
-                                    overflowY: 'auto',
-                                    paddingRight: '2px',
-                                    scrollbarWidth: 'thin',
-                                  } : {}),
-                                }}
-                              >
+                              <div className={isExpanded ? 'tcard-tags tcard-tags--expanded' : 'tcard-tags'}>
                                 {visibleCols.map((col, cIdx) => (
-                                  <span key={cIdx} style={{
-                                    background: 'var(--paper-inset)',
-                                    border: '1px solid var(--line)',
-                                    borderRadius: '4px',
-                                    padding: '0.1rem 0.4rem',
-                                    fontSize: '0.68rem',
-                                    color: 'var(--ink-1)',
-                                    fontFamily: 'var(--font-mono)',
-                                    maxWidth: '100%',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                  }}>{col}</span>
+                                  <span key={cIdx} className="tag">{col}</span>
                                 ))}
                               </div>
                               {hasMore && (
                                 <button
+                                  type="button"
+                                  className="btn-link"
+                                  style={{ marginTop: '0.45rem' }}
                                   onClick={() => toggleColumnExpansion(idx)}
-                                  style={{
-                                    marginTop: '0.4rem',
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    color: 'var(--accent-strong)',
-                                    fontSize: '0.68rem',
-                                    fontWeight: 600,
-                                    padding: 0,
-                                    fontFamily: 'var(--font-sans)',
-                                  }}
+                                  aria-expanded={isExpanded}
                                 >
                                   {isExpanded
                                     ? '▲ Show less'
@@ -934,647 +833,417 @@ function App() {
                 })}
               </div>
             )}
-          </section>
+          </RetroWindow>
         </aside>
 
-        {/* Right Workspace */}
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Right column: editor + results, or the file viewer */}
+        <main className="desk-col desk-col--main">
           {viewingFile ? (
-            <>
-              {/* File viewer — replaces the editor and results panes */}
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                gap: '0.75rem',
-                padding: '0.7rem 1.5rem',
-                background: 'var(--paper-1)',
-                borderBottom: '1px solid var(--line)',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.7rem', minWidth: 0 }}>
-                  <span style={sectionLabelStyle}>File contents</span>
-                  <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 600,
-                    color: 'var(--ink-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  }}>
-                    {viewingFile}
-                  </span>
+            <RetroWindow title="File contents" tone="tan" className="results-window" bodyClassName="viewer-body">
+              {/* File viewer — replaces the editor and results windows */}
+              <div className="win-strip">
+                <div className="win-strip-group">
+                  <span className="mono-name">{viewingFile}</span>
                   {viewData?.source_format && (
-                    <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: '0.66rem', fontWeight: 600,
-                      color: 'var(--accent-strong)', background: 'var(--accent-soft)',
-                      border: '1px solid var(--accent-line)', borderRadius: '9999px',
-                      padding: '0.08rem 0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em',
-                    }}>
-                      {viewData.source_format}
-                    </span>
+                    <span className="chip chip--lavender">{viewData.source_format}</span>
                   )}
                   {viewData && (
-                    <span style={{ fontSize: '0.72rem', color: 'var(--ink-2)', fontFamily: 'var(--font-mono)' }}>
-                      {viewData.results.length.toLocaleString()} rows
-                    </span>
+                    <span className="meta-mono">{viewData.results.length.toLocaleString()} rows</span>
                   )}
                 </div>
                 <button
                   type="button"
+                  className="btn btn-sm"
                   onClick={closeFileView}
                   aria-label="Close file view and return to the SQL editor"
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0,
-                    height: 32, padding: '0 0.8rem',
-                    background: 'var(--paper-2)', color: 'var(--ink-1)',
-                    border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)',
-                    cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
-                    transition: 'border-color 0.15s ease, color 0.15s ease',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-line)'; e.currentTarget.style.color = 'var(--ink-0)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.color = 'var(--ink-1)'; }}
                 >
-                  <X style={{ width: 14, height: 14 }} />
+                  <X aria-hidden="true" />
                   Back to editor
                 </button>
               </div>
 
-              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                {viewLoading && (
-                  <div style={{
-                    flex: 1, display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', justifyContent: 'center', gap: '0.8rem', color: 'var(--ink-2)',
-                  }}>
-                    <div className="loading-spinner-large" />
-                    <span style={{ fontSize: '0.85rem' }}>Loading file contents…</span>
-                  </div>
-                )}
+              {viewLoading && (
+                <div className="state" role="status">
+                  <div className="loader" aria-hidden="true"><span /></div>
+                  <span className="state-text">Loading file contents…</span>
+                </div>
+              )}
 
-                {!viewLoading && viewError && (
-                  <div style={{ padding: '1.5rem' }}>
-                    <div className="message message-error">{viewError}</div>
+              {!viewLoading && viewError && (
+                <div style={{ padding: '1.1rem' }}>
+                  <div className="message message-error" role="alert">
+                    <AlertCircle aria-hidden="true" />
+                    {viewError}
                   </div>
-                )}
+                </div>
+              )}
 
-                {!viewLoading && !viewError && viewData && (
-                  viewData.source_format === 'json' ? (
-                    <div style={{ flex: 1, minHeight: 0 }}>
-                      <Editor
-                        height="100%"
-                        defaultLanguage="json"
-                        theme="spymonkLight"
-                        beforeMount={defineEditorTheme}
-                        value={JSON.stringify(viewData.results, null, 2)}
-                        options={{
-                          readOnly: true,
-                          domReadOnly: true,
-                          minimap: { enabled: false },
-                          scrollBeyondLastLine: false,
-                          fontSize: 13,
-                          padding: { top: 14, bottom: 14 },
-                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          lineNumbers: 'on',
-                          folding: true,
-                          wordWrap: 'off',
-                          scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 },
-                          automaticLayout: true,
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
-                      <div style={{
-                        background: 'var(--paper-1)', border: '1px solid var(--line)',
-                        borderRadius: 'var(--radius)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)',
-                      }}>
-                        <DataTable
-                          key={`view_${viewingFile}_${viewData.results.length}`}
-                          columns={viewData.columns}
-                          data={viewData.results}
-                        />
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </>
+              {!viewLoading && !viewError && viewData && (
+                viewData.source_format === 'json' ? (
+                  <div style={{ flex: 1, minHeight: 0 }}>
+                    <Editor
+                      height="100%"
+                      defaultLanguage="json"
+                      theme="spymonkRetro"
+                      beforeMount={defineEditorTheme}
+                      value={JSON.stringify(viewData.results, null, 2)}
+                      options={{
+                        readOnly: true,
+                        domReadOnly: true,
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        fontSize: 13,
+                        padding: { top: 14, bottom: 14 },
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        lineNumbers: 'on',
+                        folding: true,
+                        wordWrap: 'off',
+                        scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
+                        automaticLayout: true,
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <DataTable
+                    key={`view_${viewingFile}_${viewData.results.length}`}
+                    columns={viewData.columns}
+                    data={viewData.results}
+                  />
+                )
+              )}
+            </RetroWindow>
           ) : (
             <>
-
-          {/* SQL Editor Header */}
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0.7rem 1.5rem',
-            background: 'var(--paper-1)',
-            borderBottom: '1px solid var(--line)',
-          }}>
-            <span style={sectionLabelStyle}>SQL editor</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsAiPanelOpen(value => !value);
-                  setAiError(null);
-                }}
-                aria-label="AI assistant"
-                aria-pressed={isAiPanelOpen}
-                title="AI assistant"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                  height: 34, padding: '0 0.7rem',
-                  background: isAiPanelOpen ? 'var(--accent-soft)' : 'var(--paper-2)',
-                  color: isAiPanelOpen ? 'var(--accent-strong)' : 'var(--ink-1)',
-                  border: `1px solid ${isAiPanelOpen ? 'var(--accent-line)' : 'var(--line)'}`,
-                  borderRadius: 'var(--radius-sm)',
-                  cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
-                  transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease',
-                }}
-              >
-                <Sparkles style={{ width: 15, height: 15 }} />
-                Assistant
-              </button>
-
-              {isExecuting && (
-                <button
-                  onClick={handleCancelQuery}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                    height: 34, padding: '0 0.9rem',
-                    background: 'var(--danger-soft)',
-                    color: 'var(--danger)',
-                    border: '1px solid var(--danger-line)', borderRadius: 'var(--radius-sm)',
-                    cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
-                  }}
-                  aria-label="Cancel running query"
-                >
-                  <Square style={{ width: 13, height: 13 }} />
-                  Cancel
-                </button>
-              )}
-
-              <button
-                onClick={handleRunQuery}
-                disabled={!canRun}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
-                  height: 34, padding: '0 1.05rem',
-                  background: canRun ? 'var(--accent)' : 'var(--paper-inset)',
-                  color: canRun ? '#fff' : 'var(--ink-2)',
-                  border: 'none', borderRadius: 'var(--radius-sm)',
-                  cursor: canRun ? 'pointer' : 'not-allowed',
-                  fontWeight: 600, fontSize: '0.82rem',
-                  transition: 'background 0.15s ease',
-                }}
-                onMouseEnter={e => { if (canRun) (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent-hover)'; }}
-                onMouseLeave={e => { if (canRun) (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent)'; }}
-                aria-label="Run SQL query"
-                title="Run query  (⌘/Ctrl + Enter)"
-              >
-                {isExecuting ? (
-                  <div className="loading-spinner" style={{ width: 14, height: 14, borderWidth: 2, borderTopColor: '#fff', borderColor: 'rgba(255,255,255,0.35)' }} />
-                ) : (
-                  <Play style={{ width: 14, height: 14 }} />
-                )}
-                {isExecuting ? 'Running…' : 'Run query'}
-              </button>
-            </div>
-          </div>
-
-          {isAiPanelOpen && (
-            <section style={{
-              background: 'var(--paper-1)',
-              borderBottom: '1px solid var(--line)',
-              padding: '1rem 1.5rem',
-            }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Sparkles style={{ width: 16, height: 16, color: 'var(--ink-1)' }} />
-                  <span style={{ color: 'var(--ink-0)', fontSize: '1rem', fontWeight: 600, fontFamily: 'var(--font-display)' }}>
-                    AI SQL assistant
-                  </span>
-                </div>
-                <span style={{ color: 'var(--ink-2)', fontSize: '0.74rem' }}>
-                  Optimize, generate, and fix — SELECT queries only.
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-                {AI_MODES.map(mode => {
-                  const active = aiMode === mode.id;
-                  return (
+              <RetroWindow title="SQL editor" tone="coral" className="win--fixed">
+                <div className="win-strip">
+                  <span className="eyebrow">query.sql · ⌘/Ctrl + Enter runs it</span>
+                  <div className="win-strip-group">
                     <button
-                      key={mode.id}
                       type="button"
-                      aria-pressed={active}
+                      className="btn btn-sm"
                       onClick={() => {
-                        setAiMode(mode.id);
-                        setAiResult(null);
+                        setIsAiPanelOpen(value => !value);
                         setAiError(null);
                       }}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                        padding: '0.4rem 0.8rem',
-                        background: active ? 'var(--accent-soft)' : 'var(--paper-2)',
-                        border: `1px solid ${active ? 'var(--accent-line)' : 'var(--line)'}`,
-                        borderRadius: '999px',
-                        color: active ? 'var(--accent-strong)' : 'var(--ink-1)',
-                        cursor: 'pointer', fontSize: '0.76rem', fontWeight: 600,
-                        transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease',
-                      }}
+                      aria-label="AI assistant"
+                      aria-pressed={isAiPanelOpen}
+                      title="AI assistant"
                     >
-                      {active && (
-                        <span aria-hidden="true" style={{
-                          width: 6, height: 6, borderRadius: '50%',
-                          background: 'var(--accent-strong)', flexShrink: 0,
-                        }} />
-                      )}
-                      {mode.label}
+                      <Sparkles aria-hidden="true" />
+                      Assistant
                     </button>
-                  );
-                })}
-              </div>
 
-              <textarea
-                value={aiInput}
-                onChange={(event) => setAiInput(event.target.value)}
-                placeholder={AI_MODES.find(mode => mode.id === aiMode)?.placeholder}
-                rows={3}
-                style={{
-                  width: '100%',
-                  resize: 'vertical',
-                  minHeight: 76,
-                  background: 'var(--paper-2)',
-                  border: '1px solid var(--line)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: 'var(--ink-0)',
-                  padding: '0.7rem 0.8rem',
-                  fontSize: '0.86rem',
-                  fontFamily: 'var(--font-sans)',
-                  outline: 'none',
-                }}
-                aria-label="AI assistant prompt"
-              />
-
-              {aiMode === 'fix_sql_error' && lastQueryError && (
-                <p style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '0.5rem' }}>
-                  Last error: {lastQueryError}
-                </p>
-              )}
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.75rem' }}>
-                <button
-                  type="button"
-                  onClick={handleSubmitAiRequest}
-                  disabled={isAiLoading}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                    padding: '0.45rem 1rem',
-                    background: isAiLoading ? 'var(--paper-inset)' : 'var(--accent)',
-                    color: isAiLoading ? 'var(--ink-2)' : '#fff',
-                    border: 'none', borderRadius: 'var(--radius-sm)',
-                    cursor: isAiLoading ? 'wait' : 'pointer',
-                    fontWeight: 600, fontSize: '0.82rem',
-                    transition: 'background 0.15s ease',
-                  }}
-                  onMouseEnter={e => { if (!isAiLoading) (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent-hover)'; }}
-                  onMouseLeave={e => { if (!isAiLoading) (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent)'; }}
-                >
-                  <Sparkles style={{ width: 14, height: 14 }} />
-                  {isAiLoading ? 'Resolving…' : 'Resolve'}
-                </button>
-
-                {aiResult && (
-                  <button
-                    type="button"
-                    onClick={handleApplyAiQuery}
-                    style={{
-                      padding: '0.45rem 1rem',
-                      background: 'var(--sage-soft)',
-                      border: '1px solid var(--sage-line)',
-                      borderRadius: 'var(--radius-sm)',
-                      color: 'var(--sage)',
-                      cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
-                    }}
-                  >
-                    Apply to editor
-                  </button>
-                )}
-              </div>
-
-              {aiError && (
-                <div className="message message-error" style={{ marginTop: '0.75rem' }}>
-                  {aiError}
-                </div>
-              )}
-
-              {aiResult && (
-                <div style={{
-                  marginTop: '0.75rem',
-                  background: 'var(--paper-inset)',
-                  border: '1px solid var(--line)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '0.8rem',
-                }}>
-                  <div style={{ color: 'var(--ink-2)', fontSize: '0.68rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                    Suggested query
-                  </div>
-                  <pre style={{
-                    margin: 0,
-                    whiteSpace: 'pre-wrap',
-                    color: 'var(--ink-0)',
-                    fontSize: '0.82rem',
-                    fontFamily: 'var(--font-mono)',
-                  }}>
-                    {aiResult.suggested_query}
-                  </pre>
-                  {aiResult.explanation && (
-                    <p style={{ color: 'var(--ink-1)', fontSize: '0.82rem', margin: '0.7rem 0 0', lineHeight: 1.55 }}>
-                      {aiResult.explanation}
-                    </p>
-                  )}
-                </div>
-              )}
-            </section>
-          )}
-
-          {/* Monaco Editor */}
-          <div style={{ height: '336px', borderBottom: '1px solid var(--line)', background: 'var(--paper-2)' }}>
-            <Editor
-              height="100%"
-              defaultLanguage="sql"
-              theme="spymonkLight"
-              beforeMount={defineEditorTheme}
-              value={query}
-              onMount={handleEditorDidMount}
-              onChange={(value) => setQuery(value || '')}
-              options={{
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                fontSize: 14,
-                padding: { top: 16, bottom: 16 },
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontLigatures: true,
-                renderLineHighlight: 'all',
-                scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 },
-                automaticLayout: true,
-                suggestOnTriggerCharacters: true,
-                quickSuggestions: { other: true, comments: false, strings: true },
-                wordBasedSuggestions: "off",
-                lineNumbers: "on",
-              }}
-            />
-          </div>
-
-          {/* Results Area */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
-            {error && (
-              <div style={{
-                background: 'var(--danger-soft)', border: '1px solid var(--danger-line)',
-                borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem',
-                color: 'var(--danger)', fontSize: '0.86rem', marginBottom: '1rem',
-                display: 'flex', alignItems: 'flex-start', gap: '0.5rem',
-              }}>
-                <Database style={{ width: 16, height: 16, flexShrink: 0, marginTop: 2 }} />
-                <span><strong>Error:</strong> {error}</span>
-              </div>
-            )}
-
-            {!error && queryResult && (
-              <div className="rise-in">
-                {/* Query Results Header */}
-                <div style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.6rem',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.7rem' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--ink-0)', fontSize: '1.05rem', fontFamily: 'var(--font-display)' }}>Results</span>
-                    <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 600,
-                      color: 'var(--ink-1)', background: 'var(--paper-inset)',
-                      border: '1px solid var(--line)', borderRadius: '9999px',
-                      padding: '0.15rem 0.6rem',
-                    }}>
-                      {queryResult.results.length.toLocaleString()} rows
-                    </span>
-                    {queryResult.cache_hit && (
-                      <span style={{ fontSize: '0.72rem', color: 'var(--sage)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-                        ● cached
-                      </span>
-                    )}
-                    {typeof queryResult.partitions_total === 'number' && queryResult.partitions_total > 0 && (
-                      <span style={{ fontSize: '0.72rem', color: 'var(--ink-2)', fontFamily: 'var(--font-mono)' }}>
-                        scanned {queryResult.partitions_scanned}/{queryResult.partitions_total} partitions
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    {(['csv', 'json', 'xlsx'] as DownloadFormat[]).map(format => (
+                    {isExecuting && (
                       <button
-                        key={format}
                         type="button"
-                        onClick={() => handleDownloadResults(format)}
-                        aria-label={`Download query results as ${format.toUpperCase()}`}
-                        title={`Download ${format.toUpperCase()}`}
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
-                          padding: '0.28rem 0.6rem',
-                          background: 'var(--paper-1)',
-                          border: '1px solid var(--line)',
-                          borderRadius: '6px',
-                          color: 'var(--ink-1)',
-                          cursor: 'pointer',
-                          fontSize: '0.7rem',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.07em',
-                          transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-line)'; e.currentTarget.style.color = 'var(--accent-strong)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.color = 'var(--ink-1)'; }}
+                        className="btn btn-sm btn-danger-soft"
+                        onClick={handleCancelQuery}
+                        aria-label="Cancel running query"
                       >
-                        <Download style={{ width: 12, height: 12 }} />
-                        {format}
+                        <Square aria-hidden="true" />
+                        Cancel
                       </button>
-                    ))}
+                    )}
+
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-primary"
+                      onClick={handleRunQuery}
+                      disabled={!canRun}
+                      aria-busy={isExecuting}
+                      aria-label="Run SQL query"
+                      title="Run query  (⌘/Ctrl + Enter)"
+                    >
+                      {isExecuting ? (
+                        <span className="loading-spinner" aria-hidden="true" />
+                      ) : (
+                        <Play aria-hidden="true" />
+                      )}
+                      {isExecuting ? 'Running…' : 'Run query'}
+                    </button>
                   </div>
                 </div>
 
-                <div style={{
-                  background: 'var(--paper-1)', border: '1px solid var(--line)',
-                  borderRadius: 'var(--radius)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)',
-                }}>
-                  <DataTable
-                    key={`${queryResult.table_used}_${queryResult.results.length}`}
-                    columns={queryResult.columns}
-                    data={queryResult.results}
+                {isAiPanelOpen && (
+                  <section className="assistant" aria-labelledby="assistant-title">
+                    <div className="assistant-head">
+                      <h3 id="assistant-title" className="assistant-title">
+                        <Sparkles aria-hidden="true" />
+                        AI SQL assistant
+                      </h3>
+                      <span className="muted" style={{ fontSize: '0.76rem' }}>
+                        Optimize, generate, and fix — SELECT queries only.
+                      </span>
+                    </div>
+
+                    <div className="assistant-modes">
+                      {AI_MODES.map(mode => (
+                        <button
+                          key={mode.id}
+                          type="button"
+                          className="mode"
+                          aria-pressed={aiMode === mode.id}
+                          onClick={() => {
+                            setAiMode(mode.id);
+                            setAiResult(null);
+                            setAiError(null);
+                          }}
+                        >
+                          <span className="mode-dot" aria-hidden="true" />
+                          {mode.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <textarea
+                      className="field"
+                      value={aiInput}
+                      onChange={(event) => setAiInput(event.target.value)}
+                      placeholder={AI_MODES.find(mode => mode.id === aiMode)?.placeholder}
+                      rows={3}
+                      aria-label="AI assistant prompt"
+                    />
+
+                    {aiMode === 'fix_sql_error' && lastQueryError && (
+                      <p className="assistant-last-error">Last error: {lastQueryError}</p>
+                    )}
+
+                    <div className="assistant-actions">
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={handleSubmitAiRequest}
+                        disabled={isAiLoading}
+                        aria-busy={isAiLoading}
+                      >
+                        <Sparkles aria-hidden="true" />
+                        {isAiLoading ? 'Resolving…' : 'Resolve'}
+                      </button>
+
+                      {aiResult && (
+                        <button type="button" className="btn" onClick={handleApplyAiQuery}>
+                          Apply to editor
+                        </button>
+                      )}
+                    </div>
+
+                    {aiError && (
+                      <div className="message message-error" role="alert" style={{ marginTop: '0.8rem' }}>
+                        <AlertCircle aria-hidden="true" />
+                        {aiError}
+                      </div>
+                    )}
+
+                    {aiResult && (
+                      <div className="suggestion">
+                        <div className="eyebrow">Suggested query</div>
+                        <pre>{aiResult.suggested_query}</pre>
+                        {aiResult.explanation && <p>{aiResult.explanation}</p>}
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                {/* Monaco Editor */}
+                <div className="editor-pane">
+                  <Editor
+                    height="100%"
+                    defaultLanguage="sql"
+                    theme="spymonkRetro"
+                    beforeMount={defineEditorTheme}
+                    value={query}
+                    onMount={handleEditorDidMount}
+                    onChange={(value) => setQuery(value || '')}
+                    options={{
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      fontSize: 14,
+                      padding: { top: 16, bottom: 16 },
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontLigatures: true,
+                      renderLineHighlight: 'all',
+                      scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
+                      automaticLayout: true,
+                      suggestOnTriggerCharacters: true,
+                      quickSuggestions: { other: true, comments: false, strings: true },
+                      wordBasedSuggestions: "off",
+                      lineNumbers: "on",
+                    }}
                   />
                 </div>
-              </div>
-            )}
+              </RetroWindow>
 
-            {!error && !queryResult && !isExecuting && (
-              <div style={{
-                height: '100%', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center',
-                color: 'var(--ink-2)', textAlign: 'center',
-              }}>
-                <div style={{
-                  width: 56, height: 56, borderRadius: '14px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'var(--paper-1)', border: '1px solid var(--line)',
-                  marginBottom: '1rem',
-                }}>
-                  <Database style={{ width: 24, height: 24, color: 'var(--ink-2)' }} />
-                </div>
-                <p style={{ fontSize: '1.05rem', fontFamily: 'var(--font-display)', color: 'var(--ink-1)', marginBottom: '0.3rem' }}>
-                  Ready when you are
-                </p>
-                <p style={{ fontSize: '0.85rem', color: 'var(--ink-2)' }}>
-                  Write a query and press <strong style={{ color: 'var(--accent-strong)' }}>Run query</strong> — or ⌘/Ctrl + Enter.
-                </p>
-              </div>
-            )}
-          </div>
+              {/* Results */}
+              <RetroWindow title="Results" tone="tan" className="results-window" bodyClassName="results-body">
+                {error && (
+                  <div className={queryCancelled ? 'alert-win alert-win--quiet' : 'alert-win'} role="alert">
+                    <div className="alert-win-bar">{queryCancelled ? 'Cancelled' : 'Error'}</div>
+                    <div className="alert-win-body">
+                      <span className="alert-icon" aria-hidden="true">!</span>
+                      <p>{error}</p>
+                    </div>
+                  </div>
+                )}
+
+                {!error && queryResult && (
+                  <div className="rise-in">
+                    <div className="win-strip">
+                      <div className="win-strip-group">
+                        <span className="chip chip--cream">
+                          {queryResult.results.length.toLocaleString()} rows
+                        </span>
+                        {queryResult.cache_hit && <span className="chip chip--ok">cached</span>}
+                        {typeof queryResult.partitions_total === 'number' && queryResult.partitions_total > 0 && (
+                          <span className="meta-mono">
+                            scanned {queryResult.partitions_scanned}/{queryResult.partitions_total} partitions
+                          </span>
+                        )}
+                      </div>
+                      <div className="win-strip-group">
+                        {(['csv', 'json', 'xlsx'] as DownloadFormat[]).map(format => (
+                          <button
+                            key={format}
+                            type="button"
+                            className="btn btn-sm"
+                            onClick={() => handleDownloadResults(format)}
+                            aria-label={`Download query results as ${format.toUpperCase()}`}
+                            title={`Download ${format.toUpperCase()}`}
+                          >
+                            <Download aria-hidden="true" />
+                            {format.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <DataTable
+                      key={`${queryResult.table_used}_${queryResult.results.length}`}
+                      columns={queryResult.columns}
+                      data={queryResult.results}
+                    />
+                  </div>
+                )}
+
+                {!error && !queryResult && isExecuting && (
+                  <div className="state" role="status">
+                    <div className="loader" aria-hidden="true"><span /></div>
+                    <p className="state-text">Running query…</p>
+                  </div>
+                )}
+
+                {!error && !queryResult && !isExecuting && (
+                  <div className="state">
+                    <div className="state-art" aria-hidden="true">
+                      <div className="mini-win">
+                        <div className="mini-win-bar" />
+                        <div className="mini-win-body"><Database /></div>
+                      </div>
+                      <Sparkle size={22} style={{ top: -16, right: -22 }} />
+                      <Sparkle size={14} style={{ bottom: 4, left: -22 }} />
+                    </div>
+                    <p className="state-title">Ready when you are</p>
+                    <p className="state-text">
+                      Write a query and press <strong>Run query</strong> — or <kbd>⌘/Ctrl</kbd> + <kbd>Enter</kbd>.
+                    </p>
+                  </div>
+                )}
+              </RetroWindow>
             </>
           )}
-        </div>
+        </main>
       </div>
 
-      {/* Table details modal */}
+      {/* Table details dialog */}
       {detailsFor && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label={`Details for table ${detailsFor}`}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 50,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '1rem',
-            background: 'rgba(46, 53, 71, 0.35)',
-          }}
+          className="overlay"
           onMouseDown={e => { if (e.target === e.currentTarget) closeDetails(); }}
         >
-          <div style={{
-            width: 'min(600px, 100%)', maxHeight: 'min(82vh, 720px)',
-            display: 'flex', flexDirection: 'column',
-            background: 'var(--paper-1)',
-            border: '1px solid var(--line)',
-            borderRadius: 'var(--radius)',
-            boxShadow: 'var(--shadow-lg)',
-            overflow: 'hidden',
-          }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '0.9rem 1.25rem',
-              borderBottom: '1px solid var(--line)', flexShrink: 0,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', minWidth: 0 }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, color: 'var(--ink-0)' }}>
-                  Table details
-                </span>
-                <span style={{
-                  fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--ink-1)',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                  {detailsFor}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={closeDetails}
-                aria-label="Close details"
-                className="btn-icon"
-              >
-                <X style={{ width: 15, height: 15 }} />
+          <RetroWindow
+            title={
+              <>
+                Table details
+                <span className="mono-name" style={{ marginLeft: '0.5rem', fontSize: '0.82rem' }}>{detailsFor}</span>
+              </>
+            }
+            tone="orange"
+            className="dialog dialog--stacked"
+            bodyClassName="dialog-body"
+            actions={
+              <button type="button" onClick={closeDetails} aria-label="Close details" className="btn-icon btn-icon--bar">
+                <X aria-hidden="true" />
               </button>
-            </div>
+            }
+          >
+            {detailsLoading && (
+              <div className="state" role="status" style={{ padding: '2rem 0' }}>
+                <div className="loader" aria-hidden="true"><span /></div>
+                <span className="state-text">Loading details…</span>
+              </div>
+            )}
 
-            <div style={{ overflowY: 'auto', padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
-              {detailsLoading && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem', padding: '2rem 0', color: 'var(--ink-2)' }}>
-                  <div className="loading-spinner-large" />
-                  <span style={{ fontSize: '0.85rem' }}>Loading details…</span>
+            {detailsError && !detailsLoading && (
+              <div className="message message-error" role="alert">
+                <AlertCircle aria-hidden="true" />
+                {detailsError}
+              </div>
+            )}
+
+            {details && !detailsLoading && (
+              <>
+                <div className="stats">
+                  {[
+                    { label: 'Total rows', value: details.record_count.toLocaleString() },
+                    { label: 'Columns', value: String(details.column_count) },
+                    { label: 'Format', value: details.source_format ? details.source_format.toUpperCase() : '—' },
+                    { label: 'Uploaded', value: details.uploaded_at ? new Date(details.uploaded_at).toLocaleString() : '—' },
+                  ].map(stat => (
+                    <div key={stat.label} className="stat">
+                      <div className="eyebrow">{stat.label}</div>
+                      <div className="stat-value">{stat.value}</div>
+                    </div>
+                  ))}
                 </div>
-              )}
 
-              {detailsError && !detailsLoading && (
-                <div className="message message-error">{detailsError}</div>
-              )}
-
-              {details && !detailsLoading && (
-                <>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.6rem' }}>
-                    {[
-                      { label: 'Total rows', value: details.record_count.toLocaleString() },
-                      { label: 'Columns', value: String(details.column_count) },
-                      { label: 'Format', value: details.source_format ? details.source_format.toUpperCase() : '—' },
-                      { label: 'Uploaded', value: details.uploaded_at ? new Date(details.uploaded_at).toLocaleString() : '—' },
-                    ].map(stat => (
-                      <div key={stat.label} style={{
-                        background: 'var(--paper-inset)', border: '1px solid var(--line)',
-                        borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.7rem',
-                      }}>
-                        <div style={{ fontSize: '0.64rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--ink-2)', marginBottom: '0.2rem' }}>
-                          {stat.label}
-                        </div>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--ink-0)', fontFamily: 'var(--font-mono)' }}>
-                          {stat.value}
-                        </div>
+                <section>
+                  <h3 className="eyebrow section-label">Table definitions</h3>
+                  <div className="schema">
+                    {details.columns.map(col => (
+                      <div key={col} className="schema-row">
+                        <span className="schema-name">{col}</span>
+                        <span className="schema-type">{details.schema?.[col] ?? '—'}</span>
                       </div>
                     ))}
                   </div>
+                </section>
 
-                  <section>
-                    <div style={{ ...sectionLabelStyle, marginBottom: '0.5rem' }}>Table definitions</div>
-                    <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-                      {details.columns.map((col, i) => (
-                        <div key={col} style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem',
-                          padding: '0.42rem 0.7rem',
-                          borderTop: i === 0 ? 'none' : '1px solid var(--line-soft)',
-                          background: i % 2 ? 'var(--paper-inset)' : 'var(--paper-1)',
-                        }}>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--ink-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {col}
-                          </span>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--ink-2)', flexShrink: 0 }}>
-                            {details.schema?.[col] ?? '—'}
-                          </span>
+                <section>
+                  <h3 className="eyebrow section-label">Last 5 queries</h3>
+                  {details.last_queries.length === 0 ? (
+                    <p className="muted" style={{ fontSize: '0.82rem' }}>
+                      No queries have been run on this table yet.
+                    </p>
+                  ) : (
+                    <div className="history">
+                      {details.last_queries.map((q, i) => (
+                        <div key={i} className="history-item">
+                          <pre>{q.query}</pre>
+                          <div className="history-meta">
+                            <span>{new Date(q.at).toLocaleString()}</span>
+                            {typeof q.row_count === 'number' && <span>{q.row_count.toLocaleString()} rows</span>}
+                            {q.cache_hit && <span>served from cache</span>}
+                          </div>
                         </div>
                       ))}
                     </div>
-                  </section>
-
-                  <section>
-                    <div style={{ ...sectionLabelStyle, marginBottom: '0.5rem' }}>Last 5 queries</div>
-                    {details.last_queries.length === 0 ? (
-                      <p style={{ fontSize: '0.8rem', color: 'var(--ink-2)' }}>
-                        No queries have been run on this table yet.
-                      </p>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {details.last_queries.map((q, i) => (
-                          <div key={i} style={{
-                            background: 'var(--paper-inset)', border: '1px solid var(--line)',
-                            borderRadius: 'var(--radius-sm)', padding: '0.55rem 0.7rem',
-                          }}>
-                            <pre style={{
-                              margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                              fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--ink-0)', lineHeight: 1.5,
-                            }}>
-                              {q.query}
-                            </pre>
-                            <div style={{ marginTop: '0.35rem', fontSize: '0.68rem', color: 'var(--ink-2)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                              <span>{new Date(q.at).toLocaleString()}</span>
-                              {typeof q.row_count === 'number' && <span>{q.row_count.toLocaleString()} rows</span>}
-                              {q.cache_hit && <span>served from cache</span>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </section>
-                </>
-              )}
-            </div>
-          </div>
+                  )}
+                </section>
+              </>
+            )}
+          </RetroWindow>
         </div>
       )}
     </div>

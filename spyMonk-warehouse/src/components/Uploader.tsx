@@ -19,7 +19,7 @@ const Uploader: React.FC<UploaderProps> = ({ onUploadSuccess }) => {
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
-    
+
     const file = acceptedFiles[0];
     setIsUploading(true);
     setError(null);
@@ -61,66 +61,25 @@ const Uploader: React.FC<UploaderProps> = ({ onUploadSuccess }) => {
 
   return (
     <div className="w-full">
-      <div
-        {...getRootProps()}
-        style={{
-          padding: '1.5rem',
-          border: `1.5px dashed ${isDragActive ? 'var(--accent)' : 'var(--line)'}`,
-          borderRadius: 'var(--radius-sm)',
-          background: isDragActive ? 'var(--accent-soft)' : 'var(--paper-2)',
-          transition: 'border-color 0.15s ease, background 0.15s ease',
-          cursor: 'pointer',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.75rem'
-        }}
-        onMouseEnter={(e) => {
-          if (!isDragActive) e.currentTarget.style.borderColor = 'var(--accent-line)';
-        }}
-        onMouseLeave={(e) => {
-          if (!isDragActive) e.currentTarget.style.borderColor = 'var(--line)';
-        }}
-      >
+      <div {...getRootProps({ className: isDragActive ? 'dropzone is-active' : 'dropzone' })}>
         <input {...getInputProps()} />
 
         {isUploading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-            <div className="loading-spinner-large" />
-            <p style={{ color: 'var(--ink-1)', fontWeight: 500 }}>Processing…</p>
+          <div role="status" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.7rem' }}>
+            <div className="loader" aria-hidden="true"><span /></div>
+            <p className="dropzone-title">Processing…</p>
           </div>
         ) : (
           <>
-            <div style={{
-              padding: '0.7rem',
-              background: 'var(--paper-1)',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--line)'
-            }}>
-              <UploadCloud
-                className="w-8 h-8"
-                style={{ color: 'var(--accent-strong)' }}
-              />
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'var(--ink-0)',
-                marginBottom: '0.35rem',
-              }}>
+            <span className="dropzone-icon" aria-hidden="true">
+              <UploadCloud />
+            </span>
+            <div>
+              <p className="dropzone-title" style={{ marginBottom: '0.35rem' }}>
                 {isDragActive ? "Drop your file to upload" : "Drag a file here, or click to browse"}
               </p>
-              <p style={{
-                fontSize: '0.7rem',
-                color: 'var(--ink-2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-              }} className="font-mono">
-                <FileType className="w-3 h-3" /> csv · json · xlsx
+              <p className="eyebrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                <FileType className="w-3 h-3" aria-hidden="true" /> csv · json · xlsx
               </p>
             </div>
           </>
@@ -128,8 +87,8 @@ const Uploader: React.FC<UploaderProps> = ({ onUploadSuccess }) => {
       </div>
 
       {error && (
-        <div className="message message-error" style={{ marginTop: '1rem' }}>
-          <AlertCircle className="w-5 h-5" />
+        <div className="message message-error" role="alert" style={{ marginTop: '0.9rem' }}>
+          <AlertCircle aria-hidden="true" />
           <p>{error}</p>
         </div>
       )}
