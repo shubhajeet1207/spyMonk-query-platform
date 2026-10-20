@@ -1,197 +1,53 @@
-<svg width="1200" height="320" viewBox="0 0 1200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="spyMonk — distributed SQL engine and analytical warehouse">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="600" viewBox="0 0 1600 600" role="img" aria-labelledby="title desc">
+  <title id="title">spyMonk Query Platform — distributed storage and analytical querying</title>
+  <desc id="desc">A graphite, coral, and teal technical banner. Data files flow into columnar partitions, safe SQL queries, and inspectable results. The existing Python, TypeScript, Docker, GitHub Actions, Prometheus, Grafana, and Loki icons remain in the technology rail.</desc>
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0b1220"/>
-      <stop offset="55%" stop-color="#171136"/>
-      <stop offset="100%" stop-color="#1c1033"/>
-    </linearGradient>
-    <linearGradient id="topBar" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#22d3ee"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
-    </radialGradient>
-    <pattern id="pcb" width="80" height="80" patternUnits="userSpaceOnUse">
-      <path d="M0,20 H30 V50 H80" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
-      <path d="M50,0 V30 H80" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
-      <circle cx="30" cy="50" r="1.4" fill="#ffffff" fill-opacity="0.09"/>
-      <circle cx="50" cy="30" r="1.4" fill="#ffffff" fill-opacity="0.09"/>
-    </pattern>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#171427"/><stop offset="1" stop-color="#0d111d"/></linearGradient>
+    <radialGradient id="warm-light"><stop stop-color="#f05b43" stop-opacity=".13"/><stop offset="1" stop-color="#f05b43" stop-opacity="0"/></radialGradient>
+    <radialGradient id="cool-light"><stop stop-color="#83d5ce" stop-opacity=".10"/><stop offset="1" stop-color="#83d5ce" stop-opacity="0"/></radialGradient>
+    <linearGradient id="focus-card" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4a2b36"/><stop offset="1" stop-color="#211e32"/></linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#b9b3c9" stroke-opacity=".055"/></pattern>
+    <marker id="arrow-coral" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="m1 1 5 3-5 3" fill="none" stroke="#ef8d7b" stroke-width="1.4"/></marker>
+    <marker id="arrow-teal" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="m1 1 5 3-5 3" fill="none" stroke="#83d5ce" stroke-width="1.4"/></marker>
   </defs>
 
-  <rect width="1200" height="320" fill="url(#bg)"/>
-  <rect width="1200" height="320" fill="url(#pcb)"/>
-  <rect width="1200" height="4" fill="url(#topBar)"/>
+  <rect width="1600" height="600" rx="24" fill="url(#background)"/>
+  <rect x="1" y="1" width="1598" height="598" rx="23" fill="url(#grid)" stroke="#373043"/>
+  <ellipse cx="1110" cy="180" rx="500" ry="320" fill="url(#warm-light)"/><ellipse cx="1410" cy="405" rx="250" ry="220" fill="url(#cool-light)"/>
 
-  <!-- HUD-style corner brackets -->
-  <g stroke-width="2" fill="none" stroke-opacity="0.55">
-    <path d="M14,42 V14 H42" stroke="#22d3ee"/>
-    <path d="M1158,14 H1186 V42" stroke="#8b5cf6"/>
-    <path d="M14,278 V306 H42" stroke="#8b5cf6"/>
-    <path d="M1186,278 V306 H1158" stroke="#22d3ee"/>
-  </g>
+  <g font-family="'Segoe UI', Arial, sans-serif">
+    <g transform="translate(80 47)" stroke="#f5806a" stroke-width="2" fill="none" stroke-linejoin="round"><path d="m0 12 16-9 16 9-16 9Z"/><path d="m0 21 16 9 16-9M0 30l16 9 16-9"/><path d="M40 10h14M40 17h22M40 24h10" stroke="#83d5ce"/></g>
+    <text x="164" y="76" fill="#c5bccf" font-family="Consolas, monospace" font-size="16" letter-spacing="3">DISTRIBUTED DATA SYSTEM</text><text x="1520" y="76" text-anchor="end" fill="#b8afc4" font-family="Consolas, monospace" font-size="14" letter-spacing="2">PARTITION FIRST / QUERY WITH CONTEXT</text>
+    <text x="76" y="205" fill="#fff4e7" font-size="100" font-weight="700" letter-spacing="-5">spyMonk</text><text x="81" y="270" fill="#f5806a" font-size="43" font-weight="400" letter-spacing="1">Query Platform</text><text x="82" y="337" fill="#fff4e7" font-size="28" font-weight="600">Load data. Ask better questions.</text><text x="82" y="375" fill="#bdb5cc" font-size="28">Inspect how the answer was found.</text>
+    <g transform="translate(82 419)" font-family="Consolas, monospace" font-size="15"><rect width="144" height="36" rx="8" fill="#252133" stroke="#494052"/><text x="72" y="24" text-anchor="middle" fill="#e4d9ec">CSV / JSON</text><rect x="158" width="132" height="36" rx="8" fill="#252133" stroke="#494052"/><text x="224" y="24" text-anchor="middle" fill="#e4d9ec">SQL + JOIN</text><rect x="304" width="131" height="36" rx="8" fill="#252133" stroke="#494052"/><text x="369.5" y="24" text-anchor="middle" fill="#e4d9ec">OBSERVABLE</text></g>
 
-  <!-- blueprint-style tick marks along the base -->
-  <g stroke="#ffffff" stroke-opacity="0.08">
-    <line x1="60" y1="316" x2="60" y2="310"/>
-    <line x1="100" y1="316" x2="100" y2="310"/>
-    <line x1="140" y1="316" x2="140" y2="310"/>
-    <line x1="180" y1="316" x2="180" y2="310"/>
-    <line x1="220" y1="316" x2="220" y2="310"/>
-    <line x1="260" y1="316" x2="260" y2="310"/>
-    <line x1="300" y1="316" x2="300" y2="310"/>
-    <line x1="340" y1="316" x2="340" y2="310"/>
-    <line x1="380" y1="316" x2="380" y2="310"/>
-    <line x1="420" y1="316" x2="420" y2="310"/>
-    <line x1="460" y1="316" x2="460" y2="310"/>
-    <line x1="500" y1="316" x2="500" y2="310"/>
-    <line x1="540" y1="316" x2="540" y2="310"/>
-    <line x1="580" y1="316" x2="580" y2="310"/>
-    <line x1="620" y1="316" x2="620" y2="310"/>
-    <line x1="660" y1="316" x2="660" y2="310"/>
-    <line x1="700" y1="316" x2="700" y2="310"/>
-    <line x1="740" y1="316" x2="740" y2="310"/>
-    <line x1="780" y1="316" x2="780" y2="310"/>
-    <line x1="820" y1="316" x2="820" y2="310"/>
-    <line x1="860" y1="316" x2="860" y2="310"/>
-    <line x1="900" y1="316" x2="900" y2="310"/>
-    <line x1="940" y1="316" x2="940" y2="310"/>
-    <line x1="980" y1="316" x2="980" y2="310"/>
-    <line x1="1020" y1="316" x2="1020" y2="310"/>
-    <line x1="1060" y1="316" x2="1060" y2="310"/>
-    <line x1="1100" y1="316" x2="1100" y2="310"/>
-    <line x1="1140" y1="316" x2="1140" y2="310"/>
-  </g>
-
-  <!-- spy-scope motif -->
-  <circle cx="1040" cy="100" r="95" fill="url(#glow)"/>
-  <g stroke="#67e8f9" stroke-opacity="0.20" fill="none" stroke-width="1.5">
-    <circle cx="1040" cy="100" r="95"/>
-    <circle cx="1040" cy="100" r="65"/>
-    <circle cx="1040" cy="100" r="35"/>
-  </g>
-  <g stroke="#a78bfa" stroke-opacity="0.26" stroke-width="1.5">
-    <line x1="980" y1="100" x2="1015" y2="100"/>
-    <line x1="1065" y1="100" x2="1100" y2="100"/>
-    <line x1="1040" y1="40" x2="1040" y2="75"/>
-    <line x1="1040" y1="125" x2="1040" y2="160"/>
-  </g>
-
-  <!-- distributed-replica node mesh (Paxos quorum) -->
-  <g stroke="#8b5cf6" stroke-opacity="0.35" stroke-width="1.4">
-    <line x1="800" y1="70" x2="880" y2="50"/>
-    <line x1="880" y1="50" x2="860" y2="120"/>
-    <line x1="860" y1="120" x2="800" y2="70"/>
-    <line x1="880" y1="50" x2="940" y2="90"/>
-    <line x1="860" y1="120" x2="940" y2="90"/>
-  </g>
-  <g>
-    <circle cx="800" cy="70" r="5.5" fill="#0b1220" stroke="#22d3ee" stroke-width="2"/>
-    <circle cx="880" cy="50" r="5.5" fill="#0b1220" stroke="#22d3ee" stroke-width="2"/>
-    <circle cx="860" cy="120" r="5.5" fill="#0b1220" stroke="#22d3ee" stroke-width="2"/>
-    <circle cx="940" cy="90" r="5.5" fill="#0b1220" stroke="#a78bfa" stroke-width="2"/>
-  </g>
-
-  <!-- wordmark, terminal-prompt style -->
-  <text x="90" y="140" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="76" font-weight="700" letter-spacing="1">
-    <tspan fill="#22d3ee" opacity="0.85">&gt;_ </tspan><tspan fill="#22d3ee">spy</tspan><tspan fill="#f1f5f9">Monk</tspan>
-  </text>
-
-  <!-- tagline -->
-  <text x="93" y="180" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="21" fill="#94a3b8">
-    A distributed SQL engine and analytical warehouse, built from first principles
-  </text>
-
-  <!-- tech-stack badges: real pictograms, not text-only chips.
-       Every label uses textLength so it renders at a fixed, safe width no
-       matter which fallback font the viewer's browser actually substitutes
-       for the font-family stack below. -->
-  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="600" fill="#e2e8f0">
-
-    <!-- Python: two interlocking blocks with "eye" cutouts -->
-    <rect x="92" y="200" width="114" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(102,204)">
-      <rect x="1" y="1" width="10" height="10" rx="3" fill="#3b82f6"/>
-      <circle cx="8" cy="5" r="1.2" fill="#0b1220"/>
-      <rect x="6" y="6" width="10" height="10" rx="3" fill="#fbbf24"/>
-      <circle cx="10" cy="12" r="1.2" fill="#0b1220"/>
+    <!-- An abstract query path, not a literal UI screenshot. -->
+    <g transform="translate(855 105)">
+      <g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M155 95h36q16 0 16 16v57q0 16 16 16h18" stroke="#ef8d7b" marker-end="url(#arrow-coral)"/><path d="M155 270h36q16 0 16-16v-28q0-16 16-16h18" stroke="#ef8d7b" marker-end="url(#arrow-coral)"/><path d="M407 180h25q16 0 16-16v-60q0-16 16-16h29" stroke="#83d5ce" marker-end="url(#arrow-teal)"/><path d="M574 142v91" stroke="#83d5ce" marker-end="url(#arrow-teal)"/><path d="M488 286h-31q-12 0-12 12v41q0 18-18 18H80q-16 0-16-16v-22" stroke="#6f657e" stroke-dasharray="5 8"/></g>
+      <circle cx="207" cy="136" r="4" fill="#f5806a"/><circle cx="448" cy="136" r="4" fill="#83d5ce"/><circle cx="574" cy="184" r="4" fill="#83d5ce"/>
+      <g transform="translate(0 40)"><rect width="155" height="100" rx="14" fill="#211e30" stroke="#494052"/><g transform="translate(21 16)" fill="none" stroke="#d4c6e4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M0 0h21l10 10v30H0Z"/><path d="M21 0v11h10M7 21h16M7 29h11"/><path d="M43 12h15M43 21h11M43 30h14" stroke="#ef8d7b"/></g><text x="20" y="78" fill="#e8dfea" font-family="Consolas, monospace" font-size="15">DATA FILES</text><text x="135" y="33" text-anchor="end" fill="#a79bb6" font-family="Consolas, monospace" font-size="12">01</text></g>
+      <g transform="translate(0 220)"><rect width="155" height="100" rx="14" fill="#211e30" stroke="#494052"/><g transform="translate(22 16)" fill="none" stroke="#d4c6e4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M0 0h38v33H0Z"/><path d="M0 11h38M13 0v33M26 0v33"/><path d="m49 21 6 6 13-15" stroke="#83d5ce"/></g><text x="20" y="78" fill="#e8dfea" font-family="Consolas, monospace" font-size="15">TABLES</text><text x="135" y="33" text-anchor="end" fill="#a79bb6" font-family="Consolas, monospace" font-size="12">02</text></g>
+      <g transform="translate(240 130)"><rect x="-8" y="-8" width="182" height="136" rx="24" fill="none" stroke="#f5806a" stroke-opacity=".16"/><rect width="166" height="120" rx="18" fill="url(#focus-card)" stroke="#ef8d7b" stroke-width="1.5"/><g transform="translate(51 17)" fill="none" stroke="#ffb09c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M0 5h10M17 5h18M0 16h35M0 27h21"/><path d="m44 17 6 6 13-15"/></g><text x="83" y="87" text-anchor="middle" fill="#fff4e7" font-size="17" font-weight="600">Query engine</text><text x="83" y="106" text-anchor="middle" fill="#e4b3ab" font-family="Consolas, monospace" font-size="11" letter-spacing="1">PRUNING + CACHE</text></g>
+      <g transform="translate(493 30)"><rect width="162" height="111" rx="14" fill="#18272e" stroke="#416068"/><g transform="translate(21 17)" fill="none" stroke="#83d5ce" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M0 62V4h120v58Z"/><path d="M13 49 42 30l22 12 38-28"/><path d="M96 14h13M96 23h13"/><circle cx="13" cy="49" r="2" fill="#83d5ce"/><circle cx="42" cy="30" r="2" fill="#83d5ce"/><circle cx="64" cy="42" r="2" fill="#83d5ce"/></g><text x="21" y="95" fill="#c4f0eb" font-family="Consolas, monospace" font-size="14">RESULTS</text></g>
+      <g transform="translate(493 230)"><rect width="162" height="110" rx="14" fill="#211e30" stroke="#494052"/><g transform="translate(22 18)" fill="none" stroke="#d4c6e4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M0 48V4h44v44Z"/><path d="M8 38 18 28l8 6 11-17" stroke="#83d5ce"/><path d="M58 8h42M58 20h30M58 32h37"/></g><text x="21" y="95" fill="#e8dfea" font-family="Consolas, monospace" font-size="14">METRICS</text></g>
     </g>
-    <text x="128" y="217" text-anchor="start" textLength="60" lengthAdjust="spacingAndGlyphs">Python</text>
 
-    <!-- TypeScript: the authentic minimal "TS" square mark -->
-    <rect x="216" y="200" width="144" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(226,204)">
-      <rect x="0" y="0" width="18" height="18" rx="3" fill="#3178c6"/>
-      <text x="9" y="13" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" textLength="12" lengthAdjust="spacingAndGlyphs">TS</text>
+    <!-- Technology rail: preserves the original banner's recognizable pictograms. -->
+    <g transform="translate(80 518)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="600" fill="#e2e8f0">
+      <!-- Python -->
+      <rect width="114" height="26" rx="13" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/><g transform="translate(10,4)"><rect x="1" y="1" width="10" height="10" rx="3" fill="#3b82f6"/><circle cx="8" cy="5" r="1.2" fill="#0b1220"/><rect x="6" y="6" width="10" height="10" rx="3" fill="#fbbf24"/><circle cx="10" cy="12" r="1.2" fill="#0b1220"/></g><text x="36" y="17" textLength="60" lengthAdjust="spacingAndGlyphs">Python</text>
+      <!-- TypeScript -->
+      <rect x="124" width="144" height="26" rx="13" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/><g transform="translate(134,4)"><rect width="18" height="18" rx="3" fill="#3178c6"/><text x="9" y="13" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" textLength="12" lengthAdjust="spacingAndGlyphs">TS</text></g><text x="160" y="17" textLength="86" lengthAdjust="spacingAndGlyphs">TypeScript</text>
+      <!-- Docker -->
+      <rect x="278" width="114" height="26" rx="13" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/><g transform="translate(288,4)" fill="#2496ed"><path d="M1,13 Q2,9 7,9 H16 Q18,9 18,11 V13 Q18,15 15,15 H4 Q1,15 1,13 Z"/><rect x="5" y="5" width="3" height="3"/><rect x="9" y="5" width="3" height="3"/><rect x="9" y="1" width="3" height="3"/></g><text x="314" y="17" textLength="60" lengthAdjust="spacingAndGlyphs">Docker</text>
+      <!-- GitHub Actions -->
+      <rect x="402" width="122" height="26" rx="13" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/><g transform="translate(412,4)"><circle cx="9" cy="9" r="8" fill="none" stroke="#a78bfa" stroke-width="1.6"/><path d="M7,5 L13,9 L7,13 Z" fill="#a78bfa"/></g><text x="438" y="17" textLength="66" lengthAdjust="spacingAndGlyphs">Actions</text>
+      <!-- Prometheus -->
+      <rect x="534" width="144" height="26" rx="13" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/><g transform="translate(544,4)"><path d="M9,1 C6,5 4,7 4,10 a5,5 0 0 0 10,0 C14,7 12,5 9,1 Z" fill="#e0663f"/><path d="M9,7 C7.5,9 7,10.5 7,12 a2,2 0 0 0 4,0 c0,-1.5 -0.5,-3 -2,-5 Z" fill="#f7a072"/></g><text x="570" y="17" textLength="86" lengthAdjust="spacingAndGlyphs">Prometheus</text>
+      <!-- Grafana -->
+      <rect x="688" width="122" height="26" rx="13" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/><g transform="translate(698,4)"><path d="M2,15 A7,7 0 0 1 16,15" fill="none" stroke="#f97316" stroke-width="2"/><line x1="9" y1="15" x2="13" y2="9" stroke="#f97316" stroke-width="2"/><circle cx="9" cy="15" r="1.6" fill="#f97316"/></g><text x="724" y="17" textLength="66" lengthAdjust="spacingAndGlyphs">Grafana</text>
+      <!-- Loki -->
+      <rect x="820" width="100" height="26" rx="13" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12"/><g transform="translate(830,4)" fill="#7c9fd8"><rect x="0" y="3" width="14" height="2.2" rx="1"/><rect x="0" y="8" width="10" height="2.2" rx="1"/><rect x="0" y="13" width="12" height="2.2" rx="1"/></g><text x="856" y="17" textLength="46" lengthAdjust="spacingAndGlyphs">Loki</text>
     </g>
-    <text x="252" y="217" text-anchor="start" textLength="86" lengthAdjust="spacingAndGlyphs">TypeScript</text>
-
-    <!-- Docker: simplified whale + containers -->
-    <rect x="370" y="200" width="114" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(380,204)" fill="#2496ed">
-      <path d="M1,13 Q2,9 7,9 H16 Q18,9 18,11 V13 Q18,15 15,15 H4 Q1,15 1,13 Z"/>
-      <rect x="5" y="5" width="3" height="3"/>
-      <rect x="9" y="5" width="3" height="3"/>
-      <rect x="9" y="1" width="3" height="3"/>
-    </g>
-    <text x="406" y="217" text-anchor="start" textLength="60" lengthAdjust="spacingAndGlyphs">Docker</text>
-
-    <!-- GitHub Actions: pipeline/run icon -->
-    <rect x="494" y="200" width="122" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(504,204)">
-      <circle cx="9" cy="9" r="8" fill="none" stroke="#a78bfa" stroke-width="1.6"/>
-      <path d="M7,5 L13,9 L7,13 Z" fill="#a78bfa"/>
-    </g>
-    <text x="530" y="217" text-anchor="start" textLength="66" lengthAdjust="spacingAndGlyphs">Actions</text>
-
-    <!-- Prometheus: flame -->
-    <rect x="626" y="200" width="144" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(636,204)">
-      <path d="M9,1 C6,5 4,7 4,10 a5,5 0 0 0 10,0 C14,7 12,5 9,1 Z" fill="#e0663f"/>
-      <path d="M9,7 C7.5,9 7,10.5 7,12 a2,2 0 0 0 4,0 c0,-1.5 -0.5,-3 -2,-5 Z" fill="#f7a072"/>
-    </g>
-    <text x="662" y="217" text-anchor="start" textLength="86" lengthAdjust="spacingAndGlyphs">Prometheus</text>
-
-    <!-- Grafana: dashboard gauge -->
-    <rect x="780" y="200" width="122" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(790,204)">
-      <path d="M2,15 A7,7 0 0 1 16,15" fill="none" stroke="#f97316" stroke-width="2"/>
-      <line x1="9" y1="15" x2="13" y2="9" stroke="#f97316" stroke-width="2"/>
-      <circle cx="9" cy="15" r="1.6" fill="#f97316"/>
-    </g>
-    <text x="816" y="217" text-anchor="start" textLength="66" lengthAdjust="spacingAndGlyphs">Grafana</text>
-
-    <!-- Loki: log lines -->
-    <rect x="912" y="200" width="100" height="26" rx="13" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.12"/>
-    <g transform="translate(922,204)" fill="#7c9fd8">
-      <rect x="0" y="3" width="14" height="2.2" rx="1"/>
-      <rect x="0" y="8" width="10" height="2.2" rx="1"/>
-      <rect x="0" y="13" width="12" height="2.2" rx="1"/>
-    </g>
-    <text x="948" y="217" text-anchor="start" textLength="46" lengthAdjust="spacingAndGlyphs">Loki</text>
-  </g>
-
-  <!-- component chips, each with a small engineering icon -->
-  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#cbd5e1">
-    <!-- spyMonk-DB -->
-    <rect x="92" y="250" width="260" height="36" rx="18" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/>
-    <g transform="translate(110,259)" fill="none" stroke="#22d3ee" stroke-width="1.6">
-      <ellipse cx="9" cy="3" rx="8" ry="2.6"/>
-      <path d="M1,3 V13 A8,2.6 0 0 0 17,13 V3"/>
-      <path d="M1,8 A8,2.6 0 0 0 17,8"/>
-    </g>
-    <text x="132" y="273" text-anchor="start" textLength="195" lengthAdjust="spacingAndGlyphs">spyMonk-DB · Spanner-DB</text>
-
-    <!-- spyMonk-warehouse -->
-    <rect x="370" y="250" width="430" height="36" rx="18" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.14"/>
-    <g transform="translate(388,259)" fill="none" stroke="#a78bfa" stroke-width="1.6">
-      <rect x="0" y="0" width="18" height="14" rx="2"/>
-      <line x1="6" y1="0" x2="6" y2="14"/>
-      <line x1="12" y1="0" x2="12" y2="14"/>
-      <line x1="0" y1="7" x2="18" y2="7"/>
-    </g>
-    <text x="410" y="273" text-anchor="start" textLength="350" lengthAdjust="spacingAndGlyphs">spyMonk-warehouse · Snowflake-inspired</text>
   </g>
 </svg>
