@@ -32,9 +32,9 @@
   --paper-lavender: #f6e8ef; /* the assistant's panel              */
 
   /* -- ink ------------------------------------------------------ */
-  --ink-0: #201a3a;     /* primary text  14.2-17.0:1 on every surface */
-  --ink-1: #4a4058;     /* secondary     7.6-10.0:1                   */
-  --ink-2: #5c5266;     /* meta / labels 5.9-7.5:1                    */
+  --ink-0: #201a3a;     /* primary text  11.2-15.9:1 on every surface */
+  --ink-1: #4a4058;     /* secondary     7.4-9.3:1                    */
+  --ink-2: #5c5266;     /* meta / labels 5.6-7.1:1                    */
   --ink-3: #8a7f92;     /* decorative only                           */
 
   /* -- lines ---------------------------------------------------- */
@@ -59,16 +59,13 @@
   --sage-soft: #dcefd8;
 
   /* -- danger --------------------------------------------------- */
-  --danger: #b3321f;      /* text 5.8:1 on cream; cream on it 5.8:1 */
+  --danger: #b3321f;      /* text 6.0:1 on cream; cream on it 6.0:1 */
   --danger-soft: #fbdcd4;
 
   /* -- hard shadows: offset, never blurred -------------------- */
   --shadow-sm: 2px 2px 0 var(--ink-0);
   --shadow-md: 3px 3px 0 var(--ink-0);
   --shadow-lg: 6px 6px 0 var(--ink-0);
-
-  /* The <Logo> is single-colour via currentColor. */
-  --logo: #201a3a;
 }
 
 /* ---- base ---- */
